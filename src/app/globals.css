@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #00796b; /* Teal Green */
+  --primary-light: #26a69a; /* Light Teal */
+  --primary-dark: #004d40; /* Dark Teal */
+  --secondary: #ff7043; /* Coral Orange */
+  --secondary-light: #ff8a65; /* Light Coral */
+  --accent: #fff8f6; /* Soft Cream */
+  --text-primary: #37474f; /* Blue Grey */
+  --text-secondary: #78909c; /* Light Blue Grey */
+  --background: #ffffff; /* Pure White */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+}
+
+.gradient-coral {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+}
+
+/* Modern Card Styles */
+.modern-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Modern Button Styles */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 121, 107, 0.2);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 112, 67, 0.2);
+}
+
+/* Modern Input Styles */
+.modern-input {
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 0.875rem 1.25rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.modern-input:focus {
+  border-color: var(--primary);
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.1);
+  outline: none;
+}
+
+/* Section Styles */
+.section-padding {
+  padding: 6rem 0;
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 4rem 0;
+  }
+}
+
+/* Glass Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease forwards;
+}
