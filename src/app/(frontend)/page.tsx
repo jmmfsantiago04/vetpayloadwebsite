@@ -1,59 +1,59 @@
-import { headers as getHeaders } from 'next/headers.js'
-import Image from 'next/image'
-import { getPayload } from 'payload'
 import React from 'react'
-import { fileURLToPath } from 'url'
-
+import { getPayload } from 'payload'
 import config from '@/payload.config'
-import './styles.css'
 
 export default async function HomePage() {
-  const headers = await getHeaders()
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
-
-  const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
 
   return (
-    <div className="home">
-      <div className="content">
-        <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />
-          <Image
-            alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
-          />
-        </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
-        <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Go to admin panel
-          </a>
-          <a
-            className="docs"
-            href="https://payloadcms.com/docs"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Documentation
+    <div className="home-container">
+      <section className="hero">
+        <div className="hero-content">
+          <h1>Welcome to Vet CMS</h1>
+          <p>Modern veterinary practice management made simple</p>
+          <div className="cta-buttons">
+            <a href="/services" className="primary-button">
+              Our Services
+            </a>
+            <a href="/contact" className="secondary-button">
+              Contact Us
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="features">
+        <h2>Why Choose Us</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <h3>Digital Records</h3>
+            <p>Secure and easy access to patient records</p>
+          </div>
+          <div className="feature-card">
+            <h3>Appointment Management</h3>
+            <p>Streamlined scheduling and reminders</p>
+          </div>
+          <div className="feature-card">
+            <h3>Pet Care History</h3>
+            <p>Complete medical history at your fingertips</p>
+          </div>
+          <div className="feature-card">
+            <h3>Client Communication</h3>
+            <p>Stay connected with pet owners</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta-section">
+        <div className="cta-content">
+          <h2>Ready to Get Started?</h2>
+          <p>Join our network of modern veterinary practices</p>
+          <a href={payloadConfig.routes.admin} className="primary-button">
+            Access Admin Panel
           </a>
         </div>
-      </div>
-      <div className="footer">
-        <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
-        </a>
-      </div>
+      </section>
     </div>
   )
 }
