@@ -15,6 +15,7 @@ export interface Config {
     media: Media;
     posts: Post;
     faqs: Faq;
+    reviews: Review;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -25,6 +26,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -106,7 +108,7 @@ export interface Post {
   title: string;
   date: string;
   category: 'Cat Care' | 'Dog Care' | 'Pet Health' | 'Pet Nutrition';
-  imageUrl: string | Media;
+  imageUrl?: (string | null) | Media;
   content: {
     root: {
       type: string;
@@ -148,6 +150,24 @@ export interface Faq {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  name: string;
+  email: string;
+  rating: number;
+  comment: string;
+  petType: 'dog' | 'cat' | 'other';
+  /**
+   * Approve this review to make it visible on the website
+   */
+  isApproved?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -168,6 +188,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'faqs';
         value: string | Faq;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -268,6 +292,20 @@ export interface FaqsSelect<T extends boolean = true> {
   category?: T;
   order?: T;
   isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  rating?: T;
+  comment?: T;
+  petType?: T;
+  isApproved?: T;
   updatedAt?: T;
   createdAt?: T;
 }

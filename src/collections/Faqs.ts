@@ -1,6 +1,7 @@
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
+import type { User } from '../payload-types'
 
-const Faqs: CollectionConfig = {
+export const Faqs: CollectionConfig = {
   slug: 'faqs',
   admin: {
     useAsTitle: 'question',
@@ -8,9 +9,9 @@ const Faqs: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }: { req: { user: User | null } }) => Boolean(user),
+    update: ({ req: { user } }: { req: { user: User | null } }) => Boolean(user),
+    delete: ({ req: { user } }: { req: { user: User | null } }) => Boolean(user),
   },
   fields: [
     {
@@ -74,5 +75,3 @@ const Faqs: CollectionConfig = {
   ],
   timestamps: true,
 }
-
-export default Faqs

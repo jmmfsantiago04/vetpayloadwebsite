@@ -52,7 +52,7 @@ const Posts: CollectionConfig = {
       name: 'imageUrl',
       type: 'upload',
       relationTo: 'media',
-      required: true,
+      required: false,
     },
     {
       name: 'content',

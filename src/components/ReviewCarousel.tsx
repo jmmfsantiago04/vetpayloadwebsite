@@ -1,60 +1,96 @@
-"use client"
-import { Card } from "@/components/ui/card"
+'use client'
+import { useEffect, useState } from 'react'
+import { Card } from '@/components/ui/card'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
+} from '@/components/ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
+import { getApprovedReviews } from '@/app/actions/review'
 
-const reviews = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    petType: "Dog",
-    rating: 5,
-    review: "Amazing service! The vet was so patient with my anxious dog during the video consultation. Really helpful advice!",
-    date: "2 days ago",
-    initials: "SJ"
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    petType: "Cat",
-    rating: 5,
-    review: "Quick and professional response when my cat needed urgent care. The online consultation saved us an unnecessary trip to the emergency vet.",
-    date: "1 week ago",
-    initials: "MC"
-  },
-  {
-    id: 3,
-    name: "Emma Davis",
-    petType: "Bird",
-    rating: 5,
-    review: "The follow-up care for my parakeet was excellent. The vet provided detailed instructions and was available for all my questions.",
-    date: "2 weeks ago",
-    initials: "ED"
-  },
-  {
-    id: 4,
-    name: "Carlos Rodriguez",
-    petType: "Dog",
-    rating: 4,
-    review: "Very convenient service. Got the help I needed for my puppy's dietary concerns without leaving home.",
-    date: "3 weeks ago",
-    initials: "CR"
-  }
-];
+interface Review {
+  id: string
+  name: string
+  petType: string
+  rating: number
+  review: string
+  date: string
+  initials: string
+}
 
 const plugin = Autoplay({ delay: 3000, stopOnInteraction: false })
 
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+}
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffTime = Math.abs(now.getTime() - date.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 1) return 'yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
+  return `${Math.floor(diffDays / 365)} years ago`
+}
+
 export default function ReviewCarousel() {
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadReviews() {
+      const { reviews: approvedReviews, error } = await getApprovedReviews()
+      setIsLoading(false)
+
+      if (!error && approvedReviews.length > 0) {
+        // Transform Payload reviews to match the review card format
+        const transformedReviews: Review[] = approvedReviews.map((review) => ({
+          id: review.id,
+          name: review.name,
+          petType: review.petType.charAt(0).toUpperCase() + review.petType.slice(1),
+          rating: review.rating,
+          review: review.comment,
+          date: formatDate(review.createdAt),
+          initials: getInitials(review.name),
+        }))
+        setReviews(transformedReviews)
+      }
+    }
+
+    loadReviews()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-6xl mx-auto px-4 py-8 text-center text-gray-500">
+        Loading reviews...
+      </div>
+    )
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="w-full max-w-6xl mx-auto px-4 py-8 text-center text-gray-500">
+        No reviews available yet. Be the first to share your experience!
+      </div>
+    )
+  }
+
   return (
     <Carousel
       opts={{
-        align: "start",
+        align: 'start',
         loop: true,
       }}
       plugins={[plugin]}
@@ -80,7 +116,7 @@ export default function ReviewCarousel() {
                   </div>
                   <div className="flex gap-0.5 my-2">
                     {[...Array(5)].map((_, index) => (
-                      <span 
+                      <span
                         key={index}
                         className={`text-lg ${index < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
                       >
@@ -97,10 +133,12 @@ export default function ReviewCarousel() {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <div className="flex items-center justify-center gap-2 mt-4">
-        <CarouselPrevious className="static" />
-        <CarouselNext className="static" />
-      </div>
+      {reviews.length > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <CarouselPrevious className="static" />
+          <CarouselNext className="static" />
+        </div>
+      )}
     </Carousel>
-  );
-} 
+  )
+}

@@ -1,77 +1,115 @@
-"use client"
-import { useState } from 'react';
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
+'use client'
+import { useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
+import { Card } from '@/components/ui/card'
+import { submitReview } from '@/app/actions/review'
 
-const MAX_NAME_LENGTH = 50;
-const MAX_REVIEW_LENGTH = 200;
+const MAX_NAME_LENGTH = 50
+const MAX_REVIEW_LENGTH = 200
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }).max(MAX_NAME_LENGTH, {
-    message: `Name must not exceed ${MAX_NAME_LENGTH} characters.`
+  name: z
+    .string()
+    .min(2, {
+      message: 'Name must be at least 2 characters.',
+    })
+    .max(MAX_NAME_LENGTH, {
+      message: `Name must not exceed ${MAX_NAME_LENGTH} characters.`,
+    }),
+  email: z.string().email({
+    message: 'Please enter a valid email address.',
   }),
-  petType: z.enum(["dog", "cat", "bird", "other"], {
-    required_error: "Please select a pet type.",
+  petType: z.enum(['dog', 'cat', 'other'], {
+    required_error: 'Please select a pet type.',
   }),
-  rating: z.number().min(1, {
-    message: "Please select a rating.",
-  }).max(5),
-  review: z.string().min(10, {
-    message: "Review must be at least 10 characters.",
-  }).max(MAX_REVIEW_LENGTH, {
-    message: `Review must not exceed ${MAX_REVIEW_LENGTH} characters.`
+  rating: z
+    .number()
+    .min(1, {
+      message: 'Please select a rating.',
+    })
+    .max(5),
+  review: z
+    .string()
+    .min(10, {
+      message: 'Review must be at least 10 characters.',
+    })
+    .max(MAX_REVIEW_LENGTH, {
+      message: `Review must not exceed ${MAX_REVIEW_LENGTH} characters.`,
+    }),
+  consent: z.boolean().refine((val) => val === true, {
+    message: 'You must agree to share your review publicly.',
   }),
-  consent: z.boolean().refine(val => val === true, {
-    message: "You must agree to share your review publicly.",
-  })
 })
 
 export default function ReviewForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: '',
+      email: '',
       petType: undefined,
       rating: 0,
-      review: "",
+      review: '',
       consent: false,
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    setMessage(null);
+    setIsSubmitting(true)
+    setMessage(null)
 
     try {
-      // Log the form data instead of submitting to server
-      console.log('Form submitted:', values);
-      
-      setMessage({ type: 'success', text: 'Thank you for your review!' });
-      form.reset();
+      const result = await submitReview({
+        name: values.name,
+        email: values.email,
+        petType: values.petType,
+        rating: values.rating,
+        comment: values.review,
+      })
+
+      if (result.success) {
+        setMessage({
+          type: 'success',
+          text: 'Thank you for your review! It will be visible after approval.',
+        })
+        form.reset()
+      } else {
+        setMessage({
+          type: 'error',
+          text: result.error || 'Failed to submit review. Please try again.',
+        })
+      }
     } catch (err) {
-      console.error('Error:', err);
-      setMessage({ type: 'error', text: 'Failed to submit review. Please try again.' });
+      console.error('Error:', err)
+      setMessage({ type: 'error', text: 'Failed to submit review. Please try again.' })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
   return (
     <Card className="p-6">
       {message && (
-        <div className={`p-4 rounded-xl mb-4 ${
-          message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
+        <div
+          className={`p-4 rounded-xl mb-4 ${
+            message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          }`}
+        >
           {message.text}
         </div>
       )}
@@ -101,30 +139,49 @@ export default function ReviewForm() {
               )}
             />
 
-            {/* Pet Type Select */}
+            {/* Email Input */}
             <FormField
               control={form.control}
-              name="petType"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Pet Type</FormLabel>
+                  <FormLabel>Your Email</FormLabel>
                   <FormControl>
-                    <select
+                    <input
                       {...field}
+                      type="email"
                       className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    >
-                      <option value="">Select pet type</option>
-                      <option value="dog">Dog</option>
-                      <option value="cat">Cat</option>
-                      <option value="bird">Bird</option>
-                      <option value="other">Other</option>
-                    </select>
+                      placeholder="john@example.com"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
+          {/* Pet Type Select */}
+          <FormField
+            control={form.control}
+            name="petType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pet Type</FormLabel>
+                <FormControl>
+                  <select
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                  >
+                    <option value="">Select pet type</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="other">Other</option>
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Rating */}
           <FormField
@@ -140,9 +197,7 @@ export default function ReviewForm() {
                         key={star}
                         type="button"
                         className={`text-3xl transition-colors ${
-                          star <= field.value 
-                            ? 'text-yellow-400' 
-                            : 'text-gray-300'
+                          star <= field.value ? 'text-yellow-400' : 'text-gray-300'
                         } hover:text-yellow-500 focus:outline-none`}
                         onClick={() => field.onChange(star)}
                       >
@@ -201,15 +256,11 @@ export default function ReviewForm() {
             )}
           />
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </Button>
         </form>
       </Form>
     </Card>
-  );
-} 
+  )
+}

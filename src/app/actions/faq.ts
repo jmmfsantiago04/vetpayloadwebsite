@@ -1,6 +1,7 @@
 'use server'
 
-import payload from 'payload'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 
 type Category = 'general' | 'services' | 'pricing' | 'technical' | 'privacy'
 
@@ -17,24 +18,37 @@ interface PayloadFaq {
 
 export async function getFaqs() {
   try {
+    console.log('Attempting to fetch FAQs from Payload...')
+    const payload = await getPayload({
+      config: configPromise,
+    })
+
     const faqs = await payload.find({
       collection: 'faqs',
       limit: 100,
       depth: 0,
+      where: {
+        isActive: {
+          equals: true,
+        },
+      },
+      sort: 'order',
     })
+
+    console.log('Successfully fetched FAQs:', faqs)
 
     // Type assertion since we know the structure
     const typedFaqs = faqs.docs as unknown as PayloadFaq[]
 
     return {
-      faqs: typedFaqs.filter((faq) => faq.isActive).sort((a, b) => a.order - b.order),
+      faqs: typedFaqs.sort((a, b) => a.order - b.order),
       error: null,
     }
-  } catch (error) {
-    console.error('Error fetching FAQs:', error)
+  } catch (err) {
+    console.error('Error fetching FAQs:', err)
     return {
       faqs: [] as PayloadFaq[],
-      error: 'Failed to load FAQs',
+      error: err instanceof Error ? err.message : 'Failed to load FAQs',
     }
   }
 }
@@ -47,6 +61,10 @@ export async function createFaq(data: {
   isActive: boolean
 }) {
   try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
+
     const faq = await payload.create({
       collection: 'faqs',
       data,
@@ -69,6 +87,10 @@ export async function updateFaq(
   }>,
 ) {
   try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
+
     const faq = await payload.update({
       collection: 'faqs',
       id,
@@ -83,6 +105,10 @@ export async function updateFaq(
 
 export async function deleteFaq(id: string) {
   try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
+
     await payload.delete({
       collection: 'faqs',
       id,
