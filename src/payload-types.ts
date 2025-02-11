@@ -16,6 +16,7 @@ export interface Config {
     posts: Post;
     faqs: Faq;
     reviews: Review;
+    registrations: Registration;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -27,6 +28,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    registrations: RegistrationsSelect<false> | RegistrationsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -168,6 +170,20 @@ export interface Review {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registrations".
+ */
+export interface Registration {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  status: 'pending' | 'approved' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -192,6 +208,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reviews';
         value: string | Review;
+      } | null)
+    | ({
+        relationTo: 'registrations';
+        value: string | Registration;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -306,6 +326,19 @@ export interface ReviewsSelect<T extends boolean = true> {
   comment?: T;
   petType?: T;
   isApproved?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registrations_select".
+ */
+export interface RegistrationsSelect<T extends boolean = true> {
+  email?: T;
+  firstName?: T;
+  lastName?: T;
+  password?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

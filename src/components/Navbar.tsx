@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link';
 import { useState } from 'react';
+import AuthDialogs from './AuthDialogs';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,6 +24,12 @@ export default function Navbar() {
             >
               Blog
             </Link>
+            <Link 
+              href="/faq" 
+              className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+            >
+              FAQ
+            </Link>
           </div>
           
           {/* Center Logo */}
@@ -43,12 +50,7 @@ export default function Navbar() {
             >
               Services
             </Link>
-            <Link 
-              href="/faq" 
-              className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
-            >
-              FAQ
-            </Link>
+            <AuthDialogs />
           </div>
 
           {/* Mobile Menu Button */}
@@ -103,19 +105,22 @@ export default function Navbar() {
               Blog
             </Link>
             <Link 
-              href="/services" 
-              className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Services
-            </Link>
-            <Link 
               href="/faq" 
               className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               FAQ
             </Link>
+            <Link 
+              href="/services" 
+              className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Services
+            </Link>
+            <div className="pt-2">
+              <AuthDialogs />
+            </div>
           </div>
         </div>
       </div>
