@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { useRouter } from 'next/navigation'
+import { login } from '@/app/actions/auth'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +30,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,9 +45,18 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
     setIsLoading(true);
 
     try {
-      // TODO: Implement actual login logic here
-      console.log('Login attempt with:', values);
-      onSuccess?.();
+      const result = await login({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (result.success) {
+        onSuccess?.();
+        // Open dashboard in a new tab
+        window.open('/dashboard', '_blank');
+      } else {
+        setError(result.error || 'Failed to login. Please try again.');
+      }
     } catch (err) {
       setError('Failed to login. Please try again.');
     } finally {
@@ -73,7 +85,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your email" type="email" {...field} />
+                  <Input type="email" placeholder="Enter your email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,43 +99,28 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your password" type="password" {...field} />
+                  <Input type="password" placeholder="Enter your password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => window.location.href = '/forgot-password'}
-              className="text-sm text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors"
-            >
-              Forgot your password?
-            </button>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}
           </Button>
-
-          <div className="text-center mt-4">
-            <span className="text-[var(--text-secondary)]">Don&apos;t have an account? </span>
-            <button
-              type="button"
-              onClick={onRegisterClick}
-              className="text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors"
-            >
-              Register here
-            </button>
-          </div>
         </form>
       </Form>
+
+      <div className="mt-4 text-center">
+        <span className="text-[var(--text-secondary)]">Don&apos;t have an account? </span>
+        <button
+          onClick={onRegisterClick}
+          className="text-[var(--primary)] hover:underline focus:outline-none"
+        >
+          Sign up
+        </button>
+      </div>
     </div>
-  );
+  )
 } 

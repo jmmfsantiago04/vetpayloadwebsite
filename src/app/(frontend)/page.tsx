@@ -1,11 +1,13 @@
-'use client'
 import Image from 'next/image'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import ReviewForm from '../../components/ReviewForm'
 import ReviewCarousel from '../../components/ReviewCarousel'
+import { getApprovedReviews } from '../actions/review'
 
-export default function Home() {
+export default async function Home() {
+  const { reviews, error } = await getApprovedReviews()
+  
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
       <Navbar />
@@ -119,24 +121,25 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Review Banner Section */}
-        <section className="py-16 bg-gradient-to-br from-[var(--secondary)] to-[var(--secondary-light)]">
+        {/* Reviews Section */}
+        <section className="py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Share Your Experience</h2>
-              <p className="text-lg text-[var(--accent)]">Help us improve our service</p>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">What Our Clients Say</h2>
+              <p className="text-lg text-gray-600">Read reviews from pet owners who trust our services</p>
             </div>
-
-            <div className="max-w-2xl mx-auto modern-card p-6">
-              <ReviewForm />
-            </div>
-
-            {/* Review Carousel */}
+            <ReviewCarousel reviews={reviews.map(review => ({
+              id: review.id,
+              name: review.name,
+              petType: review.petType,
+              rating: review.rating,
+              review: review.comment,
+              date: review.createdAt,
+              initials: review.name.split(' ').map(n => n[0]).join('').toUpperCase()
+            }))} />
             <div className="mt-16">
-              <h3 className="text-xl font-semibold text-white text-center mb-8">
-                What Our Pet Parents Say
-              </h3>
-              <ReviewCarousel />
+              <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Share Your Experience</h3>
+              <ReviewForm />
             </div>
           </div>
         </section>

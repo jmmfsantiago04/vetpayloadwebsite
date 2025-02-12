@@ -32,7 +32,7 @@ export async function submitReview(data: ReviewData) {
       collection: 'reviews',
       data: {
         ...data,
-        isApproved: false, // All new reviews start as unapproved
+        isApproved: true, // Auto-approve reviews - change this if you want manual approval
       },
     })
 

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { register } from '@/app/actions/auth'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -51,13 +52,18 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
     setIsLoading(true);
 
     try {
-      // TODO: Implement actual registration logic here
-      console.log('Registration attempt with:', {
+      const result = await register({
         email: values.email,
+        password: values.password,
         firstName: values.firstName,
-        lastName: values.lastName
+        lastName: values.lastName,
       });
-      onSuccess?.();
+
+      if (result.success) {
+        onSuccess?.();
+      } else {
+        setError(result.error || 'Failed to register. Please try again.');
+      }
     } catch (err) {
       setError('Failed to register. Please try again.');
     } finally {
@@ -116,7 +122,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your email" type="email" {...field} />
+                  <Input type="email" placeholder="Enter your email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,7 +136,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your password" type="password" {...field} />
+                  <Input type="password" placeholder="Create a password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -144,33 +150,28 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Confirm your password" type="password" {...field} />
+                  <Input type="password" placeholder="Confirm your password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Creating Account...' : 'Register'}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
-
-          <div className="text-center mt-4">
-            <span className="text-[var(--text-secondary)]">Already have an account? </span>
-            <button
-              type="button"
-              onClick={onLoginClick}
-              className="text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors"
-            >
-              Login here
-            </button>
-          </div>
         </form>
       </Form>
+
+      <div className="mt-4 text-center">
+        <span className="text-[var(--text-secondary)]">Already have an account? </span>
+        <button
+          onClick={onLoginClick}
+          className="text-[var(--primary)] hover:underline focus:outline-none"
+        >
+          Log in
+        </button>
+      </div>
     </div>
-  );
+  )
 } 
