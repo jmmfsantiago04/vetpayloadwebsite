@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import '../globals.css'
 
 export const metadata: Metadata = {
-  title: 'My Vet Site',
-  description: 'Your trusted partner in pet care',
+  title: 'VetPay - Atendimento Veterinário Online',
+  description: 'Seu parceiro de confiança no cuidado com pets',
 }
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body className="antialiased">{children}</body>
     </html>
   )

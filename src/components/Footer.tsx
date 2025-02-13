@@ -6,18 +6,18 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div>
-            <h3 className="text-2xl font-bold mb-6 text-[var(--accent)]">VetOnline</h3>
-            <p className="text-gray-300">Professional pet care at your fingertips</p>
+            <h3 className="text-2xl font-bold mb-6 text-[var(--accent)]">VetPay</h3>
+            <p className="text-gray-300">Atendimento veterinário profissional ao seu alcance</p>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-[var(--accent)]">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-6 text-[var(--accent)]">Links Rápidos</h4>
             <ul className="space-y-4">
               <li>
                 <Link 
                   href="/" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Home
+                  Início
                 </Link>
               </li>
               <li>
@@ -25,7 +25,7 @@ export default function Footer() {
                   href="/services" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Services
+                  Serviços
                 </Link>
               </li>
               <li>
@@ -33,7 +33,7 @@ export default function Footer() {
                   href="/about" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  About Us
+                  Sobre Nós
                 </Link>
               </li>
               <li>
@@ -47,14 +47,14 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-[var(--accent)]">Services</h4>
+            <h4 className="text-lg font-semibold mb-6 text-[var(--accent)]">Serviços</h4>
             <ul className="space-y-4">
               <li>
                 <Link 
                   href="/services#video" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Video Consultation
+                  Consulta por Vídeo
                 </Link>
               </li>
               <li>
@@ -62,7 +62,7 @@ export default function Footer() {
                   href="/services#chat" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Chat Support
+                  Suporte por Chat
                 </Link>
               </li>
               <li>
@@ -70,7 +70,7 @@ export default function Footer() {
                   href="/services#emergency" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Emergency Care
+                  Atendimento de Emergência
                 </Link>
               </li>
               <li>
@@ -78,15 +78,15 @@ export default function Footer() {
                   href="/services#followup" 
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Follow-up Care
+                  Acompanhamento
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-[var(--accent)]">Contact Us</h4>
+            <h4 className="text-lg font-semibold mb-6 text-[var(--accent)]">Contato</h4>
             <ul className="space-y-4">
-              <li className="text-gray-300">support@vetonline.com</li>
+              <li className="text-gray-300">contato@vetpay.com.br</li>
               <li>
                 <a 
                   href="https://wa.me/5571991916499" 
@@ -104,13 +104,13 @@ export default function Footer() {
                   WhatsApp: +55 71 99191-6499
                 </a>
               </li>
-              <li className="text-gray-300">Available 24/7</li>
+              <li className="text-gray-300">Disponível 24/7</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-[var(--primary-light)] mt-12 pt-8 text-center">
           <p className="text-gray-300">
-            &copy; {new Date().getFullYear()} VetOnline. All rights reserved.
+            &copy; {new Date().getFullYear()} VetPay. Todos os direitos reservados.
           </p>
         </div>
       </div>

@@ -10,13 +10,13 @@ export default function Navbar() {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
-          {/* Left Links - Hidden on mobile */}
+          {/* Links da Esquerda - Ocultos no Mobile */}
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/about" 
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
-              About
+              Sobre
             </Link>
             <Link 
               href="/blog" 
@@ -28,32 +28,32 @@ export default function Navbar() {
               href="/faq" 
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
-              FAQ
+              Dúvidas
             </Link>
           </div>
           
-          {/* Center Logo */}
+          {/* Logo Central */}
           <div className="flex items-center">
             <Link 
               href="/" 
               className="text-2xl font-bold text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors"
             >
-              VetOnline
+              VetPay
             </Link>
           </div>
           
-          {/* Right Links - Hidden on mobile */}
+          {/* Links da Direita - Ocultos no Mobile */}
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/services" 
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
-              Services
+              Serviços
             </Link>
             <AuthDialogs />
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Botão do Menu Mobile */}
           <button 
             className="md:hidden p-2 rounded-md text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--accent)] transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -83,7 +83,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Menu Mobile */}
         <div 
           className={`${
             isMobileMenuOpen ? 'block' : 'hidden'
@@ -95,7 +95,7 @@ export default function Navbar() {
               className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              About
+              Sobre
             </Link>
             <Link 
               href="/blog" 
@@ -109,14 +109,14 @@ export default function Navbar() {
               className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              FAQ
+              Dúvidas
             </Link>
             <Link 
               href="/services" 
               className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Services
+              Serviços
             </Link>
             <div className="pt-2">
               <AuthDialogs />

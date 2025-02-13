@@ -25,9 +25,22 @@ export default function ReviewCarousel({ reviews = [] }: { reviews: Review[] }) 
   if (!reviews || reviews.length === 0) {
     return (
       <div className="w-full max-w-6xl mx-auto px-4 py-8 text-center text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-        No reviews available yet.
+        Nenhuma avaliação disponível ainda.
       </div>
     )
+  }
+
+  const translatePetType = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'dog':
+        return 'Cachorro'
+      case 'cat':
+        return 'Gato'
+      case 'other':
+        return 'Outro'
+      default:
+        return type
+    }
   }
 
   return (
@@ -43,7 +56,7 @@ export default function ReviewCarousel({ reviews = [] }: { reviews: Review[] }) 
         <CarouselContent>
           {reviews.map((review) => (
             <CarouselItem key={review.id} className="sm:basis-1/2 lg:basis-1/3 pl-4">
-              <Card className="p-6  h-full bg-white shadow-sm hover:shadow-md transition-shadow">
+              <Card className="p-6 h-full bg-white shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-semibold text-sm">
                     {review.initials}
@@ -52,10 +65,12 @@ export default function ReviewCarousel({ reviews = [] }: { reviews: Review[] }) 
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-semibold text-[var(--text-primary)]">{review.name}</h3>
-                        <p className="text-sm text-[var(--text-secondary)]">{review.petType} Owner</p>
+                        <p className="text-sm text-[var(--text-secondary)]">
+                          Tutor de {translatePetType(review.petType)}
+                        </p>
                       </div>
                       <span className="text-sm text-[var(--text-secondary)] ml-2 whitespace-nowrap">
-                        {new Date(review.date).toLocaleDateString()}
+                        {new Date(review.date).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                     <div className="flex gap-0.5 my-2">

@@ -23,7 +23,7 @@ interface PayloadReview {
 
 export async function submitReview(data: ReviewData) {
   try {
-    console.log('Attempting to submit review:', data)
+    console.log('Tentando enviar avaliação:', data)
     const payload = await getPayload({
       config: configPromise,
     })
@@ -32,28 +32,28 @@ export async function submitReview(data: ReviewData) {
       collection: 'reviews',
       data: {
         ...data,
-        isApproved: true, // Auto-approve reviews - change this if you want manual approval
+        isApproved: true, // Auto-aprova avaliações - altere isso se quiser aprovação manual
       },
     })
 
-    console.log('Successfully submitted review:', review)
+    console.log('Avaliação enviada com sucesso:', review)
 
     return {
       success: true,
       error: null,
     }
   } catch (err) {
-    console.error('Error submitting review:', err)
+    console.error('Erro ao enviar avaliação:', err)
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Failed to submit review',
+      error: err instanceof Error ? err.message : 'Falha ao enviar avaliação',
     }
   }
 }
 
 export async function getApprovedReviews() {
   try {
-    console.log('Attempting to fetch approved reviews...')
+    console.log('Tentando buscar avaliações aprovadas...')
     const payload = await getPayload({
       config: configPromise,
     })
@@ -66,20 +66,20 @@ export async function getApprovedReviews() {
         },
       },
       sort: '-createdAt',
-      limit: 10, // Limit to most recent 10 approved reviews
+      limit: 10, // Limita para as 10 avaliações mais recentes
     })
 
-    console.log('Successfully fetched approved reviews:', reviews)
+    console.log('Avaliações aprovadas buscadas com sucesso:', reviews)
 
     return {
       reviews: reviews.docs as PayloadReview[],
       error: null,
     }
   } catch (err) {
-    console.error('Error fetching reviews:', err)
+    console.error('Erro ao buscar avaliações:', err)
     return {
       reviews: [],
-      error: err instanceof Error ? err.message : 'Failed to load reviews',
+      error: err instanceof Error ? err.message : 'Falha ao carregar avaliações',
     }
   }
 }

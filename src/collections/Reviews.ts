@@ -4,22 +4,37 @@ export const Reviews: CollectionConfig = {
   slug: 'reviews',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'rating', 'createdAt'],
+    defaultColumns: ['name', 'rating', 'petType', 'isApproved'],
   },
   access: {
     read: () => true,
-    create: () => true, // Allow public submissions
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {
       name: 'name',
       type: 'text',
       required: true,
+      label: 'Nome',
     },
     {
       name: 'email',
       type: 'email',
       required: true,
+      label: 'E-mail',
+    },
+    {
+      name: 'petType',
+      type: 'select',
+      required: true,
+      label: 'Tipo de Animal',
+      options: [
+        { label: 'Cachorro', value: 'dog' },
+        { label: 'Gato', value: 'cat' },
+        { label: 'Outro', value: 'other' },
+      ],
     },
     {
       name: 'rating',
@@ -27,39 +42,19 @@ export const Reviews: CollectionConfig = {
       required: true,
       min: 1,
       max: 5,
+      label: 'Avaliação',
     },
     {
       name: 'comment',
       type: 'textarea',
       required: true,
-    },
-    {
-      name: 'petType',
-      type: 'select',
-      required: true,
-      options: [
-        {
-          label: 'Dog',
-          value: 'dog',
-        },
-        {
-          label: 'Cat',
-          value: 'cat',
-        },
-        {
-          label: 'Other',
-          value: 'other',
-        },
-      ],
+      label: 'Comentário',
     },
     {
       name: 'isApproved',
       type: 'checkbox',
+      label: 'Aprovado',
       defaultValue: false,
-      admin: {
-        position: 'sidebar',
-        description: 'Approve this review to make it visible on the website',
-      },
     },
   ],
   timestamps: true,

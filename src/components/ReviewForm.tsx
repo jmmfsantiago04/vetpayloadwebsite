@@ -23,39 +23,37 @@ const formSchema = z.object({
   name: z
     .string()
     .min(2, {
-      message: 'Name must be at least 2 characters.',
+      message: 'O nome deve ter pelo menos 2 caracteres.',
     })
     .max(MAX_NAME_LENGTH, {
-      message: `Name must not exceed ${MAX_NAME_LENGTH} characters.`,
+      message: `O nome não deve exceder ${MAX_NAME_LENGTH} caracteres.`,
     }),
   email: z.string().email({
-    message: 'Please enter a valid email address.',
+    message: 'Por favor, insira um endereço de e-mail válido.',
   }),
   petType: z.enum(['dog', 'cat', 'other'], {
-    required_error: 'Please select a pet type.',
+    required_error: 'Por favor, selecione um tipo de animal.',
   }),
   rating: z
     .number()
     .min(1, {
-      message: 'Please select a rating.',
+      message: 'Por favor, selecione uma avaliação.',
     })
     .max(5),
   review: z
     .string()
     .min(10, {
-      message: 'Review must be at least 10 characters.',
+      message: 'A avaliação deve ter pelo menos 10 caracteres.',
     })
     .max(MAX_REVIEW_LENGTH, {
-      message: `Review must not exceed ${MAX_REVIEW_LENGTH} characters.`,
+      message: `A avaliação não deve exceder ${MAX_REVIEW_LENGTH} caracteres.`,
     }),
-  consent: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to share your review publicly.',
-  }),
 })
 
 export default function ReviewForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,13 +63,13 @@ export default function ReviewForm() {
       petType: undefined,
       rating: 0,
       review: '',
-      consent: false,
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true)
-    setMessage(null)
+    setIsLoading(true)
+    setError('')
+    setSuccess(false)
 
     try {
       const result = await submitReview({
@@ -83,184 +81,162 @@ export default function ReviewForm() {
       })
 
       if (result.success) {
-        setMessage({
-          type: 'success',
-          text: 'Thank you for your review! It will be visible after approval.',
-        })
+        setSuccess(true)
         form.reset()
       } else {
-        setMessage({
-          type: 'error',
-          text: result.error || 'Failed to submit review. Please try again.',
-        })
+        setError(result.error || 'Falha ao enviar avaliação')
       }
     } catch (err) {
-      console.error('Error:', err)
-      setMessage({ type: 'error', text: 'Failed to submit review. Please try again.' })
+      setError('Falha ao enviar avaliação. Por favor, tente novamente.')
     } finally {
-      setIsSubmitting(false)
+      setIsLoading(false)
     }
   }
 
+  if (success) {
+    return (
+      <div className="text-center p-6">
+        <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">Avaliação Enviada com Sucesso!</h3>
+        <p className="text-[var(--text-secondary)] mb-4">Sua avaliação será exibida após aprovação.</p>
+      </div>
+    )
+  }
+
   return (
-    <Card className="p-6">
-      {message && (
-        <div
-          className={`p-4 rounded-xl mb-4 ${
-            message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name Input */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Name</FormLabel>
-                  <FormControl>
-                    <input
-                      {...field}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                      placeholder="John Doe"
-                    />
-                  </FormControl>
-                  <div className="text-xs text-[var(--text-secondary)]">
-                    {field.value.length}/{MAX_NAME_LENGTH} characters
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Email Input */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Email</FormLabel>
-                  <FormControl>
-                    <input
-                      {...field}
-                      type="email"
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                      placeholder="john@example.com"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+            {error}
           </div>
+        )}
 
-          {/* Pet Type Select */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Nome */}
           <FormField
             control={form.control}
-            name="petType"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Pet Type</FormLabel>
+                <FormLabel>Nome</FormLabel>
                 <FormControl>
-                  <select
+                  <input
                     {...field}
                     className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                  >
-                    <option value="">Select pet type</option>
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="other">Other</option>
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Rating */}
-          <FormField
-            control={form.control}
-            name="rating"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Rate our service</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        className={`text-3xl transition-colors ${
-                          star <= field.value ? 'text-yellow-400' : 'text-gray-300'
-                        } hover:text-yellow-500 focus:outline-none`}
-                        onClick={() => field.onChange(star)}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Review Textarea */}
-          <FormField
-            control={form.control}
-            name="review"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Your Review</FormLabel>
-                <FormControl>
-                  <textarea
-                    {...field}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    placeholder="Share your experience..."
+                    placeholder="Digite seu nome"
                   />
                 </FormControl>
                 <div className="text-xs text-[var(--text-secondary)]">
-                  {field.value.length}/{MAX_REVIEW_LENGTH} characters
+                  {field.value.length}/{MAX_NAME_LENGTH} caracteres
                 </div>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Consent Checkbox */}
+          {/* Email */}
           <FormField
             control={form.control}
-            name="consent"
+            name="email"
             render={({ field }) => (
-              <FormItem className="flex items-start space-x-2">
+              <FormItem>
+                <FormLabel>E-mail</FormLabel>
                 <FormControl>
                   <input
-                    type="checkbox"
-                    checked={field.value}
-                    onChange={field.onChange}
-                    className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-gray-300 rounded mt-1"
+                    {...field}
+                    type="email"
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                    placeholder="Digite seu e-mail"
                   />
                 </FormControl>
-                <Label className="text-sm text-[var(--text-secondary)]">
-                  I agree to share this review publicly
-                </Label>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Submit Review'}
-          </Button>
-        </form>
-      </Form>
-    </Card>
+        {/* Tipo de Animal */}
+        <FormField
+          control={form.control}
+          name="petType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Animal</FormLabel>
+              <FormControl>
+                <select
+                  {...field}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                >
+                  <option value="">Selecione o tipo de animal</option>
+                  <option value="dog">Cachorro</option>
+                  <option value="cat">Gato</option>
+                  <option value="other">Outro</option>
+                </select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Avaliação */}
+        <FormField
+          control={form.control}
+          name="rating"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Avaliação</FormLabel>
+              <FormControl>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      className={`text-3xl transition-colors ${
+                        star <= field.value ? 'text-yellow-400' : 'text-gray-300'
+                      } hover:text-yellow-500 focus:outline-none`}
+                      onClick={() => field.onChange(star)}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Avaliação */}
+        <FormField
+          control={form.control}
+          name="review"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sua Avaliação</FormLabel>
+              <FormControl>
+                <textarea
+                  {...field}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                  placeholder="Compartilhe sua experiência..."
+                />
+              </FormControl>
+              <div className="text-xs text-[var(--text-secondary)]">
+                {field.value.length}/{MAX_REVIEW_LENGTH} caracteres
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Enviando...' : 'Enviar Avaliação'}
+        </Button>
+      </form>
+    </Form>
   )
 }

@@ -17,6 +17,7 @@ export interface Config {
     faqs: Faq;
     reviews: Review;
     registrations: Registration;
+    pets: Pet;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -29,6 +30,7 @@ export interface Config {
     faqs: FaqsSelect<false> | FaqsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     registrations: RegistrationsSelect<false> | RegistrationsSelect<true>;
+    pets: PetsSelect<false> | PetsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -160,12 +162,9 @@ export interface Review {
   id: string;
   name: string;
   email: string;
+  petType: 'dog' | 'cat' | 'other';
   rating: number;
   comment: string;
-  petType: 'dog' | 'cat' | 'other';
-  /**
-   * Approve this review to make it visible on the website
-   */
   isApproved?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -181,6 +180,22 @@ export interface Registration {
   lastName: string;
   password: string;
   status: 'pending' | 'approved' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pets".
+ */
+export interface Pet {
+  id: string;
+  name: string;
+  type: 'dog' | 'cat' | 'other';
+  breed: string;
+  age: number;
+  weight: number;
+  medicalHistory?: string | null;
+  owner: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -214,6 +229,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'registrations';
         value: string | Registration;
+      } | null)
+    | ({
+        relationTo: 'pets';
+        value: string | Pet;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -326,9 +345,9 @@ export interface FaqsSelect<T extends boolean = true> {
 export interface ReviewsSelect<T extends boolean = true> {
   name?: T;
   email?: T;
+  petType?: T;
   rating?: T;
   comment?: T;
-  petType?: T;
   isApproved?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -343,6 +362,21 @@ export interface RegistrationsSelect<T extends boolean = true> {
   lastName?: T;
   password?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pets_select".
+ */
+export interface PetsSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  breed?: T;
+  age?: T;
+  weight?: T;
+  medicalHistory?: T;
+  owner?: T;
   updatedAt?: T;
   createdAt?: T;
 }
