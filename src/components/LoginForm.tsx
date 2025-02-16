@@ -18,8 +18,8 @@ import {
 import { Input } from "@/components/ui/input"
 
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Por favor, insira um e-mail válido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 })
 
 interface LoginFormProps {
@@ -30,6 +30,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,6 +44,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setError('');
     setIsLoading(true);
+    setShowSuccess(false);
 
     try {
       const result = await login({
@@ -51,14 +53,28 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
       });
 
       if (result.success) {
+        setShowSuccess(true);
         onSuccess?.();
-        // Open dashboard in a new tab
-        window.open('/dashboard', '_blank');
+        
+        // Delay to show the success message
+        setTimeout(() => {
+          // Open dashboard in a new tab
+          const dashboardWindow = window.open('/dashboard', '_blank');
+          
+          // Focus on the new window if it was successfully opened
+          if (dashboardWindow) {
+            dashboardWindow.focus();
+          }
+          
+          // Reset form and success state
+          form.reset();
+          setShowSuccess(false);
+        }, 1500);
       } else {
-        setError(result.error || 'Failed to login. Please try again.');
+        setError(result.error || 'Falha ao fazer login. Por favor, tente novamente.');
       }
     } catch (err) {
-      setError('Failed to login. Please try again.');
+      setError('Falha ao fazer login. Por favor, tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -67,12 +83,19 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold text-center text-[var(--primary)] mb-6">
-        Login to Your Account
+        Entrar na sua Conta
       </h2>
       
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
           {error}
+        </div>
+      )}
+
+      {showSuccess && (
+        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+          <p className="font-medium">Login realizado com sucesso!</p>
+          <p className="text-sm">Abrindo o painel em uma nova aba...</p>
         </div>
       )}
 
@@ -83,9 +106,9 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>E-mail</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Enter your email" {...field} />
+                  <Input type="email" placeholder="Digite seu e-mail" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -97,28 +120,28 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Enter your password" {...field} />
+                  <Input type="password" placeholder="Digite sua senha" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
+          <Button type="submit" className="w-full" disabled={isLoading || showSuccess}>
+            {isLoading ? 'Entrando...' : showSuccess ? 'Redirecionando...' : 'Entrar'}
           </Button>
         </form>
       </Form>
 
       <div className="mt-4 text-center">
-        <span className="text-[var(--text-secondary)]">Don&apos;t have an account? </span>
+        <span className="text-[var(--text-secondary)]">Ainda não tem uma conta? </span>
         <button
           onClick={onRegisterClick}
           className="text-[var(--primary)] hover:underline focus:outline-none"
         >
-          Sign up
+          Cadastre-se
         </button>
       </div>
     </div>

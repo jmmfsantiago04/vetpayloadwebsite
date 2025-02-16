@@ -18,7 +18,7 @@ interface LoginData {
 
 export async function login(data: LoginData) {
   try {
-    console.log('Attempting to login user:', data.email)
+    console.log('Tentando fazer login do usuário:', data.email)
     const payload = await getPayload({
       config: configPromise,
     })
@@ -31,24 +31,48 @@ export async function login(data: LoginData) {
       },
     })
 
-    console.log('Successfully logged in user:', result.user.id)
+    // Set the session cookie
+    cookies().set('payload-token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    })
+
+    console.log('Login realizado com sucesso:', result.user.id)
 
     return {
       success: true,
       error: null,
     }
   } catch (err) {
-    console.error('Error logging in user:', err)
+    console.error('Erro ao fazer login:', err)
+    let errorMessage = 'Falha ao fazer login'
+    
+    if (err instanceof Error) {
+      // Translate common error messages
+      switch (err.message) {
+        case 'Invalid email or password':
+          errorMessage = 'E-mail ou senha inválidos'
+          break
+        case 'User not found':
+          errorMessage = 'Usuário não encontrado'
+          break
+        default:
+          errorMessage = 'Falha ao fazer login. Por favor, tente novamente.'
+      }
+    }
+
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Failed to login',
+      error: errorMessage,
     }
   }
 }
 
 export async function register(data: RegisterData) {
   try {
-    console.log('Attempting to register user:', data.email)
+    console.log('Tentando registrar usuário:', data.email)
     const payload = await getPayload({
       config: configPromise,
     })
@@ -63,17 +87,50 @@ export async function register(data: RegisterData) {
       },
     })
 
-    console.log('Successfully registered user:', user.id)
+    console.log('Usuário registrado com sucesso:', user.id)
+
+    // Automatically log in the user after registration
+    const loginResult = await payload.login({
+      collection: 'users',
+      data: {
+        email: data.email,
+        password: data.password,
+      },
+    })
+
+    // Set the session cookie
+    cookies().set('payload-token', loginResult.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    })
 
     return {
       success: true,
       error: null,
     }
   } catch (err) {
-    console.error('Error registering user:', err)
+    console.error('Erro ao registrar usuário:', err)
+    let errorMessage = 'Falha ao registrar usuário'
+    
+    if (err instanceof Error) {
+      // Translate common error messages
+      switch (err.message) {
+        case 'Email already exists':
+          errorMessage = 'Este e-mail já está em uso'
+          break
+        case 'Invalid email':
+          errorMessage = 'E-mail inválido'
+          break
+        default:
+          errorMessage = 'Falha ao registrar usuário. Por favor, tente novamente.'
+      }
+    }
+
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Failed to register user',
+      error: errorMessage,
     }
   }
 } 
