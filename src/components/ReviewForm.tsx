@@ -14,6 +14,14 @@ import {
 } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { submitReview } from '@/app/actions/review'
 
 const MAX_NAME_LENGTH = 50
@@ -162,17 +170,33 @@ export default function ReviewForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Animal</FormLabel>
-              <FormControl>
-                <select
-                  {...field}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                >
-                  <option value="">Selecione o tipo de animal</option>
-                  <option value="dog">Cachorro</option>
-                  <option value="cat">Gato</option>
-                  <option value="other">Outro</option>
-                </select>
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de animal" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-white z-10">
+                  <SelectItem 
+                    value="dog" 
+                    className="hover:bg-[var(--primary)] hover:text-white cursor-pointer transition-all duration-200 rounded-sm"
+                  >
+                    Cachorro
+                  </SelectItem>
+                  <SelectItem 
+                    value="cat" 
+                    className="hover:bg-[var(--primary)] hover:text-white cursor-pointer transition-all duration-200 rounded-sm"
+                  >
+                    Gato
+                  </SelectItem>
+                  <SelectItem 
+                    value="other" 
+                    className="hover:bg-[var(--primary)] hover:text-white cursor-pointer transition-all duration-200 rounded-sm"
+                  >
+                    Outro
+                  </SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -214,11 +238,11 @@ export default function ReviewForm() {
             <FormItem>
               <FormLabel>Sua Avaliação</FormLabel>
               <FormControl>
-                <textarea
-                  {...field}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                <Textarea
                   placeholder="Compartilhe sua experiência..."
+                  className="resize-none"
+                  rows={3}
+                  {...field}
                 />
               </FormControl>
               <div className="text-xs text-[var(--text-secondary)]">
