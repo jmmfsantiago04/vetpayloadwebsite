@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import '../globals.css'
+import { Providers } from '../providers'
+import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
   title: 'VetPay - Atendimento Veterinário Online',
@@ -13,7 +15,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Providers>
+          <div className="min-h-screen flex flex-col bg-[var(--background)]">
+            <Navbar />
+            {children}
+          </div>
+        </Providers>
+      </body>
     </html>
   )
 }

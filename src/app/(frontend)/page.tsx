@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import ReviewForm from '../../components/ReviewForm'
 import ReviewCarousel from '../../components/ReviewCarousel'
@@ -9,9 +8,7 @@ export default async function Home() {
   const { reviews, error } = await getApprovedReviews()
   
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)]">
-      <Navbar />
-
+    <>
       <main className="flex-grow">
         {/* Seção Principal */}
         <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white">
@@ -174,6 +171,6 @@ export default async function Home() {
       </main>
 
       <Footer />
-    </div>
+    </>
   )
 }

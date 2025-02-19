@@ -34,7 +34,11 @@ const formSchema = z.object({
   medicalHistory: z.string().optional(),
 })
 
-export default function PetForm() {
+interface PetFormProps {
+  userId: string
+}
+
+export default function PetForm({ userId }: PetFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -57,7 +61,7 @@ export default function PetForm() {
     setSuccess(false)
 
     try {
-      const result = await createPet(values)
+      const result = await createPet({ ...values, userId })
 
       if (result.success) {
         setSuccess(true)
@@ -248,7 +252,7 @@ export default function PetForm() {
           className="w-full bg-[var(--primary)] hover:bg-[var(--primary-light)]"
           disabled={isLoading}
         >
-          {isLoading ? 'Adicionando Pet...' : 'Adicionar Pet'}
+          {isLoading ? 'Adicionando...' : 'Adicionar Pet'}
         </Button>
       </form>
     </Form>

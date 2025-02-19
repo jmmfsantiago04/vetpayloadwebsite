@@ -1,5 +1,7 @@
 "use client"
-import { useState } from 'react';
+
+import { useState } from 'react'
+import { useActionState } from 'react'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -17,83 +19,61 @@ import {
 import { Input } from "@/components/ui/input"
 
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+  firstName: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  lastName: z.string().min(2, "O sobrenome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Por favor, insira um e-mail válido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+})
 
 interface RegisterFormProps {
   onSuccess?: () => void;
   onLoginClick?: () => void;
 }
 
+type RegisterState = string | { success: true; userId: string } | undefined;
+
 export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, formAction] = useActionState<RegisterState, FormData>(register, undefined)
+  const [isPending, setIsPending] = useState(false)
+
+  if (typeof state === 'object' && state.success) {
+    onSuccess?.()
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
       firstName: "",
       lastName: "",
+      email: "",
+      password: "",
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const result = await register({
-        email: values.email,
-        password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
-      });
-
-      if (result.success) {
-        onSuccess?.();
-      } else {
-        setError(result.error || 'Failed to register. Please try again.');
-      }
-    } catch (err) {
-      setError('Failed to register. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold text-center text-[var(--primary)] mb-6">
-        Create an Account
-      </h2>
-      
-      {error && (
+      {typeof state === 'string' && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {error}
+          {state}
         </div>
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
+                    <Input 
+                      placeholder="Digite seu nome" 
+                      {...field}
+                      name="firstName"
+                      disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,9 +85,14 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel>Sobrenome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your last name" {...field} />
+                    <Input 
+                      placeholder="Digite seu sobrenome" 
+                      {...field}
+                      name="lastName"
+                      disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,9 +105,15 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>E-mail</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Enter your email" {...field} />
+                  <Input 
+                    type="email" 
+                    placeholder="Digite seu e-mail" 
+                    {...field}
+                    name="email"
+                    disabled={isPending}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -134,42 +125,35 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Create a password" {...field} />
+                  <Input 
+                    type="password" 
+                    placeholder="Digite sua senha" 
+                    {...field}
+                    name="password"
+                    disabled={isPending}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="Confirm your password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? 'Registrando...' : 'Criar Conta'}
           </Button>
         </form>
       </Form>
 
       <div className="mt-4 text-center">
-        <span className="text-[var(--text-secondary)]">Already have an account? </span>
+        <span className="text-[var(--text-secondary)]">Já tem uma conta? </span>
         <button
           onClick={onLoginClick}
           className="text-[var(--primary)] hover:underline focus:outline-none"
+          disabled={isPending}
         >
-          Log in
+          Entrar
         </button>
       </div>
     </div>

@@ -1,136 +1,126 @@
 'use server'
 
+import { signIn, signOut, auth } from '@/auth'
+import { AuthError } from 'next-auth'
+import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 
-interface RegisterData {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-}
+type AuthState = string | { success: true; userId: string } | undefined;
 
-interface LoginData {
-  email: string
-  password: string
-}
-
-export async function login(data: LoginData) {
+export async function authenticate(
+  prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
   try {
-    console.log('Tentando fazer login do usuário:', data.email)
-    const payload = await getPayload({
-      config: configPromise,
-    })
+    const email = formData.get('email')
+    const password = formData.get('password')
 
-    const result = await payload.login({
-      collection: 'users',
-      data: {
-        email: data.email,
-        password: data.password,
-      },
-    })
-
-    // Set the session cookie
-    cookies().set('payload-token', result.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    })
-
-    console.log('Login realizado com sucesso:', result.user.id)
-
-    return {
-      success: true,
-      error: null,
-    }
-  } catch (err) {
-    console.error('Erro ao fazer login:', err)
-    let errorMessage = 'Falha ao fazer login'
-    
-    if (err instanceof Error) {
-      // Translate common error messages
-      switch (err.message) {
-        case 'Invalid email or password':
-          errorMessage = 'E-mail ou senha inválidos'
-          break
-        case 'User not found':
-          errorMessage = 'Usuário não encontrado'
-          break
-        default:
-          errorMessage = 'Falha ao fazer login. Por favor, tente novamente.'
-      }
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+      return 'Por favor, preencha todos os campos'
     }
 
-    return {
-      success: false,
-      error: errorMessage,
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
+
+    if (result?.error) {
+      console.error('Sign in error:', result.error)
+      return 'E-mail ou senha inválidos'
     }
+
+    // Get the session to get the user ID
+    const session = await auth()
+    if (!session?.user?.id) {
+      console.error('No session user ID')
+      return 'Falha ao obter informações do usuário'
+    }
+
+    return { success: true, userId: session.user.id }
+  } catch (error) {
+    console.error('Authentication error:', error)
+    return 'Falha ao fazer login. Por favor, tente novamente.'
   }
 }
 
-export async function register(data: RegisterData) {
+export async function register(
+  prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
   try {
-    console.log('Tentando registrar usuário:', data.email)
+    const email = formData.get('email')
+    const password = formData.get('password')
+    const firstName = formData.get('firstName')
+    const lastName = formData.get('lastName')
+
+    if (!email || !password || !firstName || !lastName || 
+        typeof email !== 'string' || typeof password !== 'string' ||
+        typeof firstName !== 'string' || typeof lastName !== 'string') {
+      return 'Por favor, preencha todos os campos'
+    }
+
     const payload = await getPayload({
       config: configPromise,
     })
 
-    const user = await payload.create({
+    // Check if user already exists
+    const existingUsers = await payload.find({
       collection: 'users',
-      data: {
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
+      where: {
+        email: {
+          equals: email,
+        },
       },
     })
 
-    console.log('Usuário registrado com sucesso:', user.id)
+    if (existingUsers.totalDocs > 0) {
+      return 'Este e-mail já está em uso'
+    }
 
-    // Automatically log in the user after registration
-    const loginResult = await payload.login({
+    // Create the user
+    await payload.create({
       collection: 'users',
       data: {
-        email: data.email,
-        password: data.password,
+        email,
+        password,
+        firstName,
+        lastName,
       },
     })
 
-    // Set the session cookie
-    cookies().set('payload-token', loginResult.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+    // Log the user in
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
     })
 
-    return {
-      success: true,
-      error: null,
-    }
-  } catch (err) {
-    console.error('Erro ao registrar usuário:', err)
-    let errorMessage = 'Falha ao registrar usuário'
-    
-    if (err instanceof Error) {
-      // Translate common error messages
-      switch (err.message) {
-        case 'Email already exists':
-          errorMessage = 'Este e-mail já está em uso'
-          break
-        case 'Invalid email':
-          errorMessage = 'E-mail inválido'
-          break
-        default:
-          errorMessage = 'Falha ao registrar usuário. Por favor, tente novamente.'
-      }
+    if (result?.error) {
+      return 'Falha ao fazer login após o registro. Por favor, tente fazer login manualmente.'
     }
 
-    return {
-      success: false,
-      error: errorMessage,
+    // Get the session to get the user ID
+    const session = await auth()
+    if (!session?.user?.id) {
+      return 'Falha ao obter informações do usuário após o registro.'
     }
+
+    return { success: true, userId: session.user.id }
+  } catch (error) {
+    console.error('Registration error:', error)
+    return 'Falha ao registrar usuário. Por favor, tente novamente.'
+  }
+}
+
+export async function handleLogout() {
+  try {
+    await signOut({ redirect: false })
+    redirect('/')
+  } catch (error) {
+    console.error('Logout error:', error)
+    redirect('/')
   }
 } 

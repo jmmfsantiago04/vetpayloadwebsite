@@ -1,10 +1,12 @@
 "use client"
-import { useState } from 'react';
+
+import { useState } from 'react'
+import { useFormState, useFormStatus } from 'react-dom'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { useRouter } from 'next/navigation'
-import { login } from '@/app/actions/auth'
+import { authenticate } from '@/app/actions/auth'
+import { useSession } from 'next-auth/react'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -27,12 +29,20 @@ interface LoginFormProps {
   onRegisterClick?: () => void;
 }
 
-export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const router = useRouter();
+type AuthState = string | { success: true; userId: string } | undefined;
 
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? 'Entrando...' : 'Entrar'}
+    </Button>
+  )
+}
+
+export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
+  const { update: updateSession } = useSession()
+  const [state, formAction] = useFormState(authenticate, undefined)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,66 +51,28 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setError('');
-    setIsLoading(true);
-    setShowSuccess(false);
+  if (typeof state === 'object' && state.success) {
+    updateSession()
+    onSuccess?.()
+  }
 
-    try {
-      const result = await login({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (result.success) {
-        setShowSuccess(true);
-        onSuccess?.();
-        
-        // Delay to show the success message
-        setTimeout(() => {
-          // Open dashboard in a new tab
-          const dashboardWindow = window.open('/dashboard', '_blank');
-          
-          // Focus on the new window if it was successfully opened
-          if (dashboardWindow) {
-            dashboardWindow.focus();
-          }
-          
-          // Reset form and success state
-          form.reset();
-          setShowSuccess(false);
-        }, 1500);
-      } else {
-        setError(result.error || 'Falha ao fazer login. Por favor, tente novamente.');
-      }
-    } catch (err) {
-      setError('Falha ao fazer login. Por favor, tente novamente.');
-    } finally {
-      setIsLoading(false);
+  async function clientAction(formData: FormData) {
+    form.trigger()
+    if (form.formState.isValid) {
+      formAction(formData)
     }
   }
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold text-center text-[var(--primary)] mb-6">
-        Entrar na sua Conta
-      </h2>
-      
-      {error && (
+      {typeof state === 'string' && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {error}
-        </div>
-      )}
-
-      {showSuccess && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-          <p className="font-medium">Login realizado com sucesso!</p>
-          <p className="text-sm">Abrindo o painel em uma nova aba...</p>
+          {state}
         </div>
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form action={clientAction} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
@@ -108,7 +80,12 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
               <FormItem>
                 <FormLabel>E-mail</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Digite seu e-mail" {...field} />
+                  <Input 
+                    type="email" 
+                    placeholder="Digite seu e-mail" 
+                    {...field}
+                    name="email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -122,16 +99,19 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Digite sua senha" {...field} />
+                  <Input 
+                    type="password" 
+                    placeholder="Digite sua senha" 
+                    {...field}
+                    name="password"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading || showSuccess}>
-            {isLoading ? 'Entrando...' : showSuccess ? 'Redirecionando...' : 'Entrar'}
-          </Button>
+          <SubmitButton />
         </form>
       </Form>
 
