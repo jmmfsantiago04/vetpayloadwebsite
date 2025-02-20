@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from 'react'
-import { useActionState } from 'react'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { register } from '@/app/actions/auth'
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const formSchema = z.object({
   firstName: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
@@ -30,15 +32,11 @@ interface RegisterFormProps {
   onLoginClick?: () => void;
 }
 
-type RegisterState = string | { success: true; userId: string } | undefined;
-
 export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
-  const [state, formAction] = useActionState<RegisterState, FormData>(register, undefined)
-  const [isPending, setIsPending] = useState(false)
-
-  if (typeof state === 'object' && state.success) {
-    onSuccess?.()
-  }
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,16 +48,45 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
     },
   })
 
+  async function onSubmit(formData: FormData) {
+    setIsLoading(true)
+    setError(null)
+    setSuccess(null)
+    
+    try {
+      const result = await register(undefined, formData)
+      
+      if (typeof result === 'string') {
+        setError(result)
+      } else if (result?.success) {
+        setSuccess('Conta criada com sucesso!')
+        router.push('/cliente/dashboard')
+      }
+    } catch (err) {
+      setError('Ocorreu um erro ao tentar registrar. Por favor, tente novamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <div className="w-full">
-      {typeof state === 'string' && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {state}
-        </div>
+    <div className="w-full space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {success && (
+        <Alert>
+          <CheckCircle className="h-4 w-4 text-green-500" />
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       <Form {...form}>
-        <form action={formAction} className="space-y-4">
+        <form action={onSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -72,7 +99,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
                       placeholder="Digite seu nome" 
                       {...field}
                       name="firstName"
-                      disabled={isPending}
+                      disabled={isLoading}
+                      className="bg-background"
+                      autoComplete="given-name"
                     />
                   </FormControl>
                   <FormMessage />
@@ -91,7 +120,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
                       placeholder="Digite seu sobrenome" 
                       {...field}
                       name="lastName"
-                      disabled={isPending}
+                      disabled={isLoading}
+                      className="bg-background"
+                      autoComplete="family-name"
                     />
                   </FormControl>
                   <FormMessage />
@@ -112,7 +143,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
                     placeholder="Digite seu e-mail" 
                     {...field}
                     name="email"
-                    disabled={isPending}
+                    disabled={isLoading}
+                    className="bg-background"
+                    autoComplete="email"
                   />
                 </FormControl>
                 <FormMessage />
@@ -132,7 +165,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
                     placeholder="Digite sua senha" 
                     {...field}
                     name="password"
-                    disabled={isPending}
+                    disabled={isLoading}
+                    className="bg-background"
+                    autoComplete="new-password"
                   />
                 </FormControl>
                 <FormMessage />
@@ -140,8 +175,19 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? 'Registrando...' : 'Criar Conta'}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Registrando...
+              </>
+            ) : (
+              'Registrar'
+            )}
           </Button>
         </form>
       </Form>
@@ -151,9 +197,8 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
         <button
           onClick={onLoginClick}
           className="text-[var(--primary)] hover:underline focus:outline-none"
-          disabled={isPending}
         >
-          Entrar
+          Fazer login
         </button>
       </div>
     </div>

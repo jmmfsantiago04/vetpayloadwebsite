@@ -1,7 +1,5 @@
 'use client'
 import Link from 'next/link'
-import Navbar from '../../../components/Navbar'
-import Footer from '../../../components/Footer'
 
 const services = [
   {
@@ -82,8 +80,6 @@ const commonConditions = [
 export default function Services() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
-      <Navbar />
-
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20">
@@ -203,8 +199,6 @@ export default function Services() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   )
 }

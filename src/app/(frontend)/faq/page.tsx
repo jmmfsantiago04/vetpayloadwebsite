@@ -1,6 +1,4 @@
 import { Suspense } from 'react'
-import Navbar from '../../../components/Navbar'
-import Footer from '../../../components/Footer'
 import { SearchInput } from '@/components/SearchInput'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getFaqs } from '../../actions/faq'
@@ -21,12 +19,10 @@ interface FAQ {
 
 interface SearchFaqsProps {
   faqs: FAQ[]
-  searchParams?: { q?: string }
+  searchQuery: string
 }
 
-function SearchFaqs({ faqs, searchParams }: SearchFaqsProps) {
-  const searchQuery = searchParams?.q || ''
-
+function SearchFaqs({ faqs, searchQuery }: SearchFaqsProps) {
   const filteredFaqs = faqs.filter((faq) =>
     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,24 +73,22 @@ export default async function FAQ({
   searchParams?: { q?: string }
 }) {
   const result = await getFaqs()
+  const searchQuery = searchParams?.q || ''
 
   if (result.error) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow bg-gray-50 py-12">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center text-red-600">Erro ao carregar FAQs: {result.error}</div>
           </div>
         </main>
-        <Footer />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow bg-gray-50 py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -112,11 +106,10 @@ export default async function FAQ({
           </div>
 
           <Suspense fallback={<FaqSkeleton />}>
-            <SearchFaqs faqs={result.faqs || []} searchParams={searchParams} />
+            <SearchFaqs faqs={result.faqs || []} searchQuery={searchQuery} />
           </Suspense>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }

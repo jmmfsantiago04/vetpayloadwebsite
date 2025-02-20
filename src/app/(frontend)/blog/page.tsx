@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
-import Navbar from '../../../components/Navbar'
-import Footer from '../../../components/Footer'
 import { SearchInput } from '@/components/SearchInput'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getPosts } from '../../actions/blog'
@@ -29,7 +27,7 @@ function getImageAlt(post: Post): string {
 
 interface SearchBlogProps {
   posts: Post[]
-  searchParams?: { q?: string }
+  searchQuery: string
 }
 
 function BlogPostCard({ post }: { post: Post }) {
@@ -75,9 +73,7 @@ function BlogPostCard({ post }: { post: Post }) {
   )
 }
 
-function SearchBlog({ posts, searchParams }: SearchBlogProps) {
-  const searchQuery = searchParams?.q || ''
-
+function SearchBlog({ posts, searchQuery }: SearchBlogProps) {
   const filteredPosts = posts.filter((post) =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -133,24 +129,22 @@ export default async function Blog({
   searchParams?: { q?: string }
 }) {
   const result = await getPosts()
+  const searchQuery = searchParams?.q || ''
 
   if (result.error) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow bg-gray-50 py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center text-red-600">Erro ao carregar posts: {result.error}</div>
           </div>
         </main>
-        <Footer />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -166,11 +160,10 @@ export default async function Blog({
           </div>
 
           <Suspense fallback={<BlogSkeleton />}>
-            <SearchBlog posts={result.posts || []} searchParams={searchParams} />
+            <SearchBlog posts={result.posts || []} searchQuery={searchQuery} />
           </Suspense>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }

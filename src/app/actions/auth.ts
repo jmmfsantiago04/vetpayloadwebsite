@@ -1,18 +1,14 @@
 'use server'
 
-import { signIn, signOut, auth } from '@/auth'
+import { signIn, signOut } from '@/auth'
 import { AuthError } from 'next-auth'
-import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { revalidatePath } from 'next/cache'
-
-type AuthState = string | { success: true; userId: string } | undefined;
 
 export async function authenticate(
-  prevState: AuthState,
+  prevState: any,
   formData: FormData,
-): Promise<AuthState> {
+) {
   try {
     const email = formData.get('email')
     const password = formData.get('password')
@@ -21,6 +17,25 @@ export async function authenticate(
       return 'Por favor, preencha todos os campos'
     }
 
+    // Try to authenticate with Payload first
+    try {
+      const payload = await getPayload({
+        config: configPromise,
+      })
+
+      await payload.login({
+        collection: 'users',
+        data: {
+          email,
+          password,
+        },
+      })
+    } catch (error) {
+      console.error('Payload login error:', error)
+      return 'E-mail ou senha inválidos'
+    }
+
+    // Then handle NextAuth session
     const result = await signIn('credentials', {
       email,
       password,
@@ -28,28 +43,23 @@ export async function authenticate(
     })
 
     if (result?.error) {
-      console.error('Sign in error:', result.error)
       return 'E-mail ou senha inválidos'
     }
 
-    // Get the session to get the user ID
-    const session = await auth()
-    if (!session?.user?.id) {
-      console.error('No session user ID')
-      return 'Falha ao obter informações do usuário'
-    }
-
-    return { success: true, userId: session.user.id }
+    return { success: true }
   } catch (error) {
     console.error('Authentication error:', error)
+    if (error instanceof AuthError) {
+      return 'E-mail ou senha inválidos'
+    }
     return 'Falha ao fazer login. Por favor, tente novamente.'
   }
 }
 
 export async function register(
-  prevState: AuthState,
+  prevState: any,
   formData: FormData,
-): Promise<AuthState> {
+) {
   try {
     const email = formData.get('email')
     const password = formData.get('password')
@@ -92,23 +102,26 @@ export async function register(
     })
 
     // Log the user in
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    try {
+      await payload.login({
+        collection: 'users',
+        data: {
+          email,
+          password,
+        },
+      })
 
-    if (result?.error) {
-      return 'Falha ao fazer login após o registro. Por favor, tente fazer login manualmente.'
+      await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Login after registration error:', error)
+      return 'Conta criada, mas falha ao fazer login. Por favor, tente fazer login manualmente.'
     }
-
-    // Get the session to get the user ID
-    const session = await auth()
-    if (!session?.user?.id) {
-      return 'Falha ao obter informações do usuário após o registro.'
-    }
-
-    return { success: true, userId: session.user.id }
   } catch (error) {
     console.error('Registration error:', error)
     return 'Falha ao registrar usuário. Por favor, tente novamente.'
@@ -117,10 +130,20 @@ export async function register(
 
 export async function handleLogout() {
   try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
+    await payload.logout()
     await signOut({ redirect: false })
-    redirect('/')
   } catch (error) {
     console.error('Logout error:', error)
-    redirect('/')
   }
+}
+
+export async function logout() {
+  const payload = await getPayload({
+    config: configPromise,
+  })
+  await payload.logout()
+  await signOut({ redirect: false })
 } 

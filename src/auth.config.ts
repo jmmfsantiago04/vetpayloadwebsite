@@ -12,8 +12,7 @@ export const authConfig = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.log('Missing credentials')
-          return null
+          throw new Error('Missing credentials')
         }
 
         try {
@@ -30,8 +29,7 @@ export const authConfig = {
           })
 
           if (!user) {
-            console.log('No user found')
-            return null
+            throw new Error('Invalid credentials')
           }
 
           return {
@@ -42,7 +40,7 @@ export const authConfig = {
           }
         } catch (error) {
           console.error('Auth error:', error)
-          return null
+          throw error instanceof Error ? error : new Error('Authentication failed')
         }
       }
     })
@@ -51,13 +49,17 @@ export const authConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.email = user.email
+        token.name = user.name
         token.payloadToken = user.payloadToken
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user && token) {
+      if (token && session.user) {
         session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
         session.payloadToken = token.payloadToken as string
       }
       return session
@@ -70,4 +72,5 @@ export const authConfig = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  trustHost: true,
 } satisfies NextAuthConfig 

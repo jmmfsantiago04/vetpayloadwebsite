@@ -1,7 +1,6 @@
 "use client"
 import Link from 'next/link';
 import { useState } from 'react';
-import AuthDialogs from './AuthDialogs';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -50,79 +49,76 @@ export default function Navbar() {
             >
               Serviços
             </Link>
-            <AuthDialogs />
+            <Link 
+              href="/cliente/login"
+              className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+            >
+              Área do Cliente
+            </Link>
           </div>
 
           {/* Botão do Menu Mobile */}
-          <button 
-            className="md:hidden p-2 rounded-md text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--accent)] transition-colors"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <svg 
-              className="h-6 w-6" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
             >
-              {isMobileMenuOpen ? (
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isMobileMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Menu Mobile */}
-        <div 
-          className={`${
-            isMobileMenuOpen ? 'block' : 'hidden'
-          } md:hidden absolute left-0 right-0 top-full bg-white border-t border-[var(--accent)] shadow-lg z-50`}
-        >
-          <div className="px-4 py-3 space-y-3">
-            <Link 
-              href="/about" 
-              className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sobre
-            </Link>
-            <Link 
-              href="/blog" 
-              className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link 
-              href="/faq" 
-              className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Dúvidas
-            </Link>
-            <Link 
-              href="/services" 
-              className="block text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors py-2 font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Serviços
-            </Link>
-            <div className="pt-2">
-              <AuthDialogs />
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4">
+            <div className="flex flex-col space-y-4">
+              <Link 
+                href="/about"
+                className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+              >
+                Sobre
+              </Link>
+              <Link 
+                href="/blog"
+                className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+              >
+                Blog
+              </Link>
+              <Link 
+                href="/faq"
+                className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+              >
+                Dúvidas
+              </Link>
+              <Link 
+                href="/services"
+                className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+              >
+                Serviços
+              </Link>
+              <Link 
+                href="/cliente/login"
+                className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
+              >
+                Área do Cliente
+              </Link>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </nav>
   );

@@ -14,38 +14,44 @@ interface DashboardPageProps {
   }
 }
 
-export default async function DashboardPage(props: DashboardPageProps) {
-  const session = await auth()
-  const { userId } = props.params
+export default async function DashboardPage({
+  params,
+}: DashboardPageProps) {
+  try {
+    const session = await auth()
 
-  // If not logged in, redirect to home
-  if (!session) {
-    redirect('/')
-  }
+    if (!session?.user) {
+      redirect('/')
+    }
 
-  // If trying to access another user's dashboard, redirect to own dashboard
-  if (session.user.id !== userId) {
-    redirect(`/dashboard/${session.user.id}`)
-  }
+    // Validate and compare IDs after ensuring session exists
+    const currentUserId = params.userId
+    if (session.user.id !== currentUserId) {
+      redirect(`/dashboard/${session.user.id}`)
+    }
 
-  return (
-    <div className="py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-            Bem-vindo, {session.user.name}
-          </h1>
-          <p className="text-[var(--text-secondary)] mt-2">
-            Gerencie seus pets e consultas
-          </p>
-        </div>
+    return (
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+              Bem-vindo, {session.user.name}
+            </h1>
+            <p className="text-[var(--text-secondary)] mt-2">
+              Gerencie seus pets e consultas
+            </p>
+          </div>
 
-        <div className="max-w-2xl mx-auto">
-          <div className="modern-card p-6">
-            <PetForm userId={userId} />
+          <div className="max-w-2xl mx-auto">
+            <div className="modern-card p-6">
+              <PetForm userId={currentUserId} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  } catch (error) {
+    console.error('Dashboard error:', error)
+    redirect('/')
+  }
 } 

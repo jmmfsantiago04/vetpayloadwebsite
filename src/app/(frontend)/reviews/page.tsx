@@ -1,6 +1,5 @@
 import { getApprovedReviews } from '@/app/actions/review'
 import ReviewCarousel from '@/components/ReviewCarousel'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 interface Review {
@@ -52,7 +51,6 @@ export default async function ReviewsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow bg-gray-50 py-12">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">

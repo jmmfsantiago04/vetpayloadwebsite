@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import Navbar from '../../../../components/Navbar'
 import Footer from '../../../../components/Footer'
 import RichText from '../../../../components/RichText'
 import { getPostBySlug } from '../../../actions/blog'
@@ -26,8 +25,6 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-
       <main className="flex-grow py-12">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}

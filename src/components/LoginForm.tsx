@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { authenticate } from '@/app/actions/auth'
-import { useSession } from 'next-auth/react'
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const formSchema = z.object({
   email: z.string().email("Por favor, insira um e-mail válido"),
@@ -29,20 +30,12 @@ interface LoginFormProps {
   onRegisterClick?: () => void;
 }
 
-type AuthState = string | { success: true; userId: string } | undefined;
-
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? 'Entrando...' : 'Entrar'}
-    </Button>
-  )
-}
-
 export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
-  const { update: updateSession } = useSession()
-  const [state, formAction] = useFormState(authenticate, undefined)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,28 +44,45 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
     },
   })
 
-  if (typeof state === 'object' && state.success) {
-    updateSession()
-    onSuccess?.()
-  }
-
-  async function clientAction(formData: FormData) {
-    form.trigger()
-    if (form.formState.isValid) {
-      formAction(formData)
+  async function onSubmit(formData: FormData) {
+    setIsLoading(true)
+    setError(null)
+    setSuccess(null)
+    
+    try {
+      const result = await authenticate(undefined, formData)
+      
+      if (typeof result === 'string') {
+        setError(result)
+      } else if (result?.success) {
+        setSuccess('Login realizado com sucesso!')
+        router.push('/cliente/dashboard')
+      }
+    } catch (err) {
+      setError('Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="w-full">
-      {typeof state === 'string' && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {state}
-        </div>
+    <div className="w-full space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {success && (
+        <Alert>
+          <CheckCircle className="h-4 w-4 text-green-500" />
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       <Form {...form}>
-        <form action={clientAction} className="space-y-4">
+        <form action={onSubmit} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
@@ -85,6 +95,9 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
                     placeholder="Digite seu e-mail" 
                     {...field}
                     name="email"
+                    disabled={isLoading}
+                    className="bg-background"
+                    autoComplete="email"
                   />
                 </FormControl>
                 <FormMessage />
@@ -104,6 +117,9 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
                     placeholder="Digite sua senha" 
                     {...field}
                     name="password"
+                    disabled={isLoading}
+                    className="bg-background"
+                    autoComplete="current-password"
                   />
                 </FormControl>
                 <FormMessage />
@@ -111,7 +127,20 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
             )}
           />
 
-          <SubmitButton />
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
+          </Button>
         </form>
       </Form>
 

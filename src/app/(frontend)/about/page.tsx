@@ -1,15 +1,12 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import Navbar from '../../../components/Navbar'
 import Footer from '../../../components/Footer'
 import ReviewCarousel from '../../../components/ReviewCarousel'
 
 export default function About() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
-      <Navbar />
-
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20">
