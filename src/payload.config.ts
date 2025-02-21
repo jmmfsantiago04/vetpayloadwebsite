@@ -14,6 +14,7 @@ import { Faqs } from './collections/Faqs'
 import { Reviews } from './collections/Reviews'
 import { Registrations } from './collections/Registrations'
 import { Pets } from './collections/Pets'
+import Appointments from './collections/Appointments'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +26,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Faqs, Reviews, Registrations, Pets],
+  collections: [Users, Media, Posts, Faqs, Reviews, Registrations, Pets, Appointments],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -41,4 +42,7 @@ export default buildConfig({
     payloadCloudPlugin(),
     // storage-adapter-placeholder
   ],
+  graphQL: {
+    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
+  },
 })

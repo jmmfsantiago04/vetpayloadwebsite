@@ -19,6 +19,16 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const formSchema = z.object({
   email: z.string().email("Por favor, insira um e-mail válido"),
@@ -34,6 +44,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,13 +67,17 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
         setError(result)
       } else if (result?.success) {
         setSuccess('Login realizado com sucesso!')
-        router.push('/cliente/dashboard')
+        setShowSuccessDialog(true)
       }
     } catch (err) {
       setError('Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleGoToDashboard = () => {
+    router.push('/cliente/dashboard')
   }
 
   return (
@@ -153,6 +168,25 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
           Cadastre-se
         </button>
       </div>
+
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent className='bg-white'>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Login Realizado com Sucesso!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você foi autenticado com sucesso. Deseja ir para a página do dashboard?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSuccessDialog(false)}>
+              Ficar aqui
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleGoToDashboard}>
+              Ir para o Dashboard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 } 

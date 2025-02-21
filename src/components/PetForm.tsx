@@ -1,10 +1,13 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Loader2 } from "lucide-react"
 import {
   Form,
   FormControl,
@@ -12,114 +15,92 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { createPet } from '@/app/actions/pets'
-import { handleLogout } from '@/app/actions/auth'
-import { LogOut } from 'lucide-react'
+} from "@/components/ui/form"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'O nome deve ter pelo menos 2 caracteres.',
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  type: z.enum(["dog", "cat", "other"], {
+    required_error: "Selecione o tipo do pet",
   }),
-  type: z.enum(['dog', 'cat', 'other'], {
-    required_error: 'Por favor, selecione um tipo de animal.',
-  }),
-  breed: z.string().min(2, {
-    message: 'A raça deve ter pelo menos 2 caracteres.',
-  }),
-  age: z.number().min(0).max(30, {
-    message: 'A idade deve estar entre 0 e 30 anos.',
-  }),
-  weight: z.number().min(0).max(100, {
-    message: 'O peso deve estar entre 0 e 100 kg.',
-  }),
-  medicalHistory: z.string().optional(),
+  breed: z.string().min(2, "A raça deve ter pelo menos 2 caracteres"),
+  age: z.number().min(0, "A idade não pode ser negativa").max(30, "A idade máxima é 30 anos"),
+  weight: z.number().min(0, "O peso não pode ser negativo").max(100, "O peso máximo é 100kg"),
 })
 
-interface PetFormProps {
-  userId: string
+interface Pet {
+  id: string
+  name: string
+  type: 'dog' | 'cat' | 'other'
+  breed: string
+  age: number
+  weight: number
+  medicalHistory?: string
 }
 
-export default function PetForm({ userId }: PetFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+interface PetFormProps {
+  pet?: Pet
+  onSubmit: (data: z.infer<typeof formSchema>) => Promise<void>
+  isLoading: boolean
+}
 
+export function PetForm({ pet, onSubmit, isLoading }: PetFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      type: undefined,
-      breed: '',
-      age: 0,
-      weight: 0,
-      medicalHistory: '',
+      name: pet?.name || "",
+      type: pet?.type || "dog",
+      breed: pet?.breed || "",
+      age: pet?.age || 0,
+      weight: pet?.weight || 0,
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    setError('')
-    setSuccess(false)
-
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await createPet({
-        ...values,
-        userId,
-      })
-      setSuccess(true)
-      form.reset()
+      await onSubmit(data)
     } catch (error) {
-      setError('Erro ao cadastrar pet. Por favor, tente novamente.')
-    } finally {
-      setIsLoading(false)
+      console.error('Form submission error:', error)
+      form.setError("root", {
+        type: "manual",
+        message: "Ocorreu um erro ao salvar o pet. Por favor, tente novamente.",
+      })
     }
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
-          Cadastrar Novo Pet
-        </h2>
-        <form action={handleLogout}>
-          <Button 
-            type="submit"
-            variant="outline"
-            className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)]"
-          >
-            <LogOut className="w-4 h-4" />
-            Sair
-          </Button>
-        </form>
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {form.formState.errors.root && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {form.formState.errors.root.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
-      {error && (
-        <div className="bg-red-100 text-red-700 p-4 rounded-md mb-4">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-100 text-green-700 p-4 rounded-md mb-4">
-          Pet cadastrado com sucesso!
-        </div>
-      )}
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Nome do Pet */}
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nome do Pet</FormLabel>
+                <FormLabel>Nome</FormLabel>
                 <FormControl>
-                  <input
-                    {...field}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    placeholder="Digite o nome do seu pet"
+                  <Input 
+                    {...field} 
+                    disabled={isLoading}
+                    placeholder="Nome do pet"
+                    className="bg-white"
                   />
                 </FormControl>
                 <FormMessage />
@@ -127,58 +108,69 @@ export default function PetForm({ userId }: PetFormProps) {
             )}
           />
 
-          {/* Tipo de Animal */}
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Animal</FormLabel>
-                <div className="flex gap-4">
-                  {[
-                    { value: 'dog', label: 'Cachorro', icon: '🐕' },
-                    { value: 'cat', label: 'Gato', icon: '🐈' },
-                    { value: 'other', label: 'Outro', icon: '🐾' },
-                  ].map((type) => (
-                    <label
-                      key={type.value}
-                      className={`flex-1 p-4 border rounded-xl cursor-pointer transition-all ${
-                        field.value === type.value
-                          ? 'border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]'
-                          : 'border-gray-200 hover:border-[var(--primary)]'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        className="sr-only"
-                        value={type.value}
-                        checked={field.value === type.value}
-                        onChange={() => field.onChange(type.value)}
-                      />
-                      <div className="text-center">
-                        <div className="text-2xl mb-1">{type.icon}</div>
-                        <div className="font-medium">{type.label}</div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
+                <FormLabel>Tipo</FormLabel>
+                <Select
+                  disabled={isLoading}
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="dog">Cachorro</SelectItem>
+                    <SelectItem value="cat">Gato</SelectItem>
+                    <SelectItem value="other">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
 
-          {/* Raça */}
+        <FormField
+          control={form.control}
+          name="breed"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Raça</FormLabel>
+              <FormControl>
+                <Input 
+                  {...field} 
+                  disabled={isLoading}
+                  placeholder="Raça do pet"
+                  className="bg-white"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="breed"
+            name="age"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Raça</FormLabel>
+                <FormLabel>Idade (anos)</FormLabel>
                 <FormControl>
-                  <input
+                  <Input
+                    type="number"
                     {...field}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    placeholder="Digite a raça do seu pet"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    disabled={isLoading}
+                    min={0}
+                    max={30}
+                    className="bg-white"
                   />
                 </FormControl>
                 <FormMessage />
@@ -186,77 +178,47 @@ export default function PetForm({ userId }: PetFormProps) {
             )}
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Idade */}
-            <FormField
-              control={form.control}
-              name="age"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Idade (anos)</FormLabel>
-                  <FormControl>
-                    <input
-                      {...field}
-                      type="number"
-                      min="0"
-                      max="30"
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Peso */}
-            <FormField
-              control={form.control}
-              name="weight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Peso (kg)</FormLabel>
-                  <FormControl>
-                    <input
-                      {...field}
-                      type="number"
-                      min="0"
-                      max="100"
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Histórico Médico */}
           <FormField
             control={form.control}
-            name="medicalHistory"
+            name="weight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Histórico Médico (Opcional)</FormLabel>
+                <FormLabel>Peso (kg)</FormLabel>
                 <FormControl>
-                  <textarea
+                  <Input
+                    type="number"
+                    step="0.1"
                     {...field}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    placeholder="Digite qualquer histórico médico relevante..."
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    disabled={isLoading}
+                    min={0}
+                    max={100}
+                    className="bg-white"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
 
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Cadastrando...' : 'Cadastrar Pet'}
+        <DialogFooter>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Salvar'
+            )}
           </Button>
-        </form>
-      </Form>
-    </div>
+        </DialogFooter>
+      </form>
+    </Form>
   )
 } 
