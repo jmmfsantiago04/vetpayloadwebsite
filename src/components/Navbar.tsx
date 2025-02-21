@@ -1,9 +1,13 @@
 "use client"
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const clientAreaLink = session ? '/cliente/dashboard' : '/cliente/login';
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -50,7 +54,7 @@ export default function Navbar() {
               Serviços
             </Link>
             <Link 
-              href="/cliente/login"
+              href={clientAreaLink}
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Área do Cliente
@@ -111,7 +115,7 @@ export default function Navbar() {
                 Serviços
               </Link>
               <Link 
-                href="/cliente/login"
+                href={clientAreaLink}
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Área do Cliente

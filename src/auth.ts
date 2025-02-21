@@ -15,4 +15,9 @@ declare module 'next-auth' {
   }
 }
 
-export const { auth, signIn, signOut } = NextAuth(authConfig) 
+export const { auth, signIn, signOut } = NextAuth(authConfig)
+
+// Add proper types for signOut
+export type SignOutParams = {
+  redirectTo?: string
+} 

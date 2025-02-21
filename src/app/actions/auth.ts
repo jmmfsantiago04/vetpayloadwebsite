@@ -5,6 +5,20 @@ import { AuthError } from 'next-auth'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+declare module 'next-auth' {
+  interface Session {
+    payloadToken?: string
+    user: {
+      id: string
+      email: string
+      name: string
+    }
+  }
+  interface User {
+    payloadToken?: string
+  }
+}
+
 export async function authenticate(
   prevState: any,
   formData: FormData,
@@ -128,22 +142,6 @@ export async function register(
   }
 }
 
-export async function handleLogout() {
-  try {
-    const payload = await getPayload({
-      config: configPromise,
-    })
-    await payload.logout()
-    await signOut({ redirect: false })
-  } catch (error) {
-    console.error('Logout error:', error)
-  }
-}
-
 export async function logout() {
-  const payload = await getPayload({
-    config: configPromise,
-  })
-  await payload.logout()
-  await signOut({ redirect: false })
+  await signOut({ redirectTo: '/' })
 } 

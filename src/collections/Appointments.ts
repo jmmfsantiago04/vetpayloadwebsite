@@ -1,32 +1,4 @@
-import { CollectionConfig, Access, FieldHook } from 'payload/types'
-
-interface User {
-  id: string
-  role?: string
-}
-
-interface AccessArgs {
-  req: {
-    user: User | null
-  }
-}
-
-interface AppointmentBeforeChangeHookArgs {
-  req: {
-    user: User | null
-  }
-  operation: 'create' | 'update'
-  originalDoc?: {
-    owner: string
-  }
-  data: {
-    owner: string
-  }
-}
-
-interface CreatedAtHookArgs {
-  operation: 'create' | 'update'
-}
+import { CollectionConfig } from 'payload/types'
 
 const Appointments: CollectionConfig = {
   slug: 'appointments',
@@ -38,8 +10,8 @@ const Appointments: CollectionConfig = {
     description: 'Gerenciar consultas veterinárias',
   },
   access: {
-    read: ({ req }: AccessArgs) => {
-      const user = req.user
+    read: ({ req }) => {
+      const user = req.user as { id: string; role?: string } | null
       
       // Admin can read all appointments
       if (user?.role === 'admin') return true
@@ -56,13 +28,13 @@ const Appointments: CollectionConfig = {
       // Non-authenticated users cannot read appointments
       return false
     },
-    create: ({ req }: AccessArgs) => {
-      const user = req.user
+    create: ({ req }) => {
+      const user = req.user as { role?: string } | null
       // Only authenticated users can create appointments
       return Boolean(user)
     },
-    update: ({ req }: AccessArgs) => {
-      const user = req.user
+    update: ({ req }) => {
+      const user = req.user as { id: string; role?: string } | null
       
       // Admin can update all appointments
       if (user?.role === 'admin') return true
@@ -78,8 +50,8 @@ const Appointments: CollectionConfig = {
       
       return false
     },
-    delete: ({ req }: AccessArgs) => {
-      const user = req.user
+    delete: ({ req }) => {
+      const user = req.user as { role?: string } | null
       // Only admin can delete appointments
       return user?.role === 'admin'
     },
@@ -127,22 +99,9 @@ const Appointments: CollectionConfig = {
       },
       hooks: {
         beforeChange: [
-          ({ req, operation, originalDoc, data }: AppointmentBeforeChangeHookArgs) => {
-            const user = req.user
-
-            // If user is admin, allow them to set any owner
-            if (user?.role === 'admin') {
-              return data.owner // Return the selected owner
-            }
-
-            // For regular users on create, set owner to current user
+          ({ req, operation }) => {
             if (operation === 'create') {
-              return user?.id
-            }
-
-            // For regular users on update, prevent changing owner
-            if (operation === 'update' && originalDoc) {
-              return originalDoc.owner // Keep the original owner
+              return req.user.id
             }
           }
         ]
@@ -194,7 +153,7 @@ const Appointments: CollectionConfig = {
       },
       hooks: {
         beforeChange: [
-          ({ operation }: CreatedAtHookArgs) => {
+          ({ operation }) => {
             if (operation === 'create') {
               return new Date()
             }
