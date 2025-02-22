@@ -5,6 +5,8 @@ const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'date', 'updatedAt'],
+    group: 'Conteúdo',
+    description: 'Gerenciar artigos e publicações do blog',
   },
   access: {
     read: () => true,
@@ -14,63 +16,92 @@ const Posts: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      label: 'Título',
+      admin: {
+        description: 'Digite o título do artigo',
+      },
     },
     {
       name: 'date',
       type: 'date',
       required: true,
+      label: 'Data',
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
         },
+        description: 'Selecione a data de publicação',
       },
     },
     {
       name: 'category',
       type: 'select',
       required: true,
+      label: 'Categoria',
       options: [
         {
-          label: 'Cat Care',
-          value: 'Cat Care',
+          label: 'Cuidados com Gatos',
+          value: 'cuidados-gatos',
         },
         {
-          label: 'Dog Care',
-          value: 'Dog Care',
+          label: 'Cuidados com Cães',
+          value: 'cuidados-caes',
         },
         {
-          label: 'Pet Health',
-          value: 'Pet Health',
+          label: 'Saúde Pet',
+          value: 'saude-pet',
         },
         {
-          label: 'Pet Nutrition',
-          value: 'Pet Nutrition',
+          label: 'Nutrição Pet',
+          value: 'nutricao-pet',
         },
       ],
+      admin: {
+        description: 'Selecione a categoria do artigo',
+      },
     },
     {
       name: 'imageUrl',
       type: 'upload',
       relationTo: 'media',
       required: false,
+      label: 'Imagem',
+      admin: {
+        description: 'Faça upload de uma imagem para o artigo',
+      },
     },
     {
       name: 'content',
       type: 'richText',
       required: true,
+      label: 'Conteúdo',
+      admin: {
+        description: 'Digite o conteúdo do artigo',
+      },
     },
     {
       name: 'slug',
       type: 'text',
       required: true,
+      label: 'URL Amigável',
       admin: {
         position: 'sidebar',
+        description: 'URL amigável para o artigo (gerada automaticamente do título)',
       },
       hooks: {
         beforeValidate: [
           ({ value, data }) => {
             if (!value && data?.title) {
-              return data.title.toLowerCase().replace(/ /g, '-')
+              return data.title.toLowerCase()
+                .replace(/[áàãâä]/g, 'a')
+                .replace(/[éèêë]/g, 'e')
+                .replace(/[íìîï]/g, 'i')
+                .replace(/[óòõôö]/g, 'o')
+                .replace(/[úùûü]/g, 'u')
+                .replace(/[ç]/g, 'c')
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
             }
             return value
           },

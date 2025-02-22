@@ -6,6 +6,8 @@ export const Faqs: CollectionConfig = {
   admin: {
     useAsTitle: 'question',
     defaultColumns: ['question', 'category', 'order', 'updatedAt'],
+    group: 'Conteúdo',
+    description: 'Gerenciar perguntas frequentes',
   },
   access: {
     read: () => true,
@@ -18,58 +20,72 @@ export const Faqs: CollectionConfig = {
       name: 'question',
       type: 'text',
       required: true,
+      label: 'Pergunta',
+      admin: {
+        description: 'Digite a pergunta frequente',
+      },
     },
     {
       name: 'answer',
       type: 'textarea',
       required: true,
+      label: 'Resposta',
+      admin: {
+        description: 'Digite a resposta para a pergunta',
+      },
     },
     {
       name: 'category',
       type: 'select',
       required: true,
-      defaultValue: 'general',
+      defaultValue: 'geral',
+      label: 'Categoria',
       options: [
         {
-          label: 'General',
-          value: 'general',
+          label: 'Geral',
+          value: 'geral',
         },
         {
-          label: 'Services',
-          value: 'services',
+          label: 'Serviços',
+          value: 'servicos',
         },
         {
-          label: 'Pricing',
-          value: 'pricing',
+          label: 'Preços',
+          value: 'precos',
         },
         {
-          label: 'Technical',
-          value: 'technical',
+          label: 'Técnico',
+          value: 'tecnico',
         },
         {
-          label: 'Privacy & Security',
-          value: 'privacy',
+          label: 'Privacidade & Segurança',
+          value: 'privacidade',
         },
       ],
+      admin: {
+        description: 'Selecione a categoria da pergunta',
+      },
     },
     {
       name: 'order',
       type: 'number',
       required: true,
       defaultValue: 0,
+      label: 'Ordem',
       admin: {
         position: 'sidebar',
         description:
-          'Use this field to control the display order of FAQs (lower numbers appear first)',
+          'Use este campo para controlar a ordem de exibição das FAQs (números menores aparecem primeiro)',
       },
     },
     {
       name: 'isActive',
       type: 'checkbox',
       defaultValue: true,
+      label: 'Ativo',
       admin: {
         position: 'sidebar',
-        description: 'Use this to temporarily hide a FAQ without deleting it',
+        description: 'Use isto para ocultar temporariamente uma FAQ sem excluí-la',
       },
     },
   ],

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { authenticate } from '@/app/actions/auth'
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Loader2, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from "@/components/ui/button"
@@ -18,11 +18,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -41,10 +39,10 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,20 +55,22 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
 
   async function onSubmit(formData: FormData) {
     setIsLoading(true)
-    setError(null)
-    setSuccess(null)
+    setErrorMessage(null)
+    setShowErrorDialog(false)
+    setShowSuccessDialog(false)
     
     try {
       const result = await authenticate(undefined, formData)
       
       if (typeof result === 'string') {
-        setError(result)
+        setErrorMessage(result)
+        setShowErrorDialog(true)
       } else if (result?.success) {
-        setSuccess('Login realizado com sucesso!')
         setShowSuccessDialog(true)
       }
     } catch (err) {
-      setError('Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.')
+      setErrorMessage('Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.')
+      setShowErrorDialog(true)
     } finally {
       setIsLoading(false)
     }
@@ -82,20 +82,6 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
 
   return (
     <div className="w-full space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <CheckCircle className="h-4 w-4 text-green-500" />
-          <AlertDescription>{success}</AlertDescription>
-        </Alert>
-      )}
-
       <Form {...form}>
         <form action={onSubmit} className="space-y-4">
           <FormField
@@ -169,6 +155,24 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
         </button>
       </div>
 
+      {/* Error Dialog */}
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Erro</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowErrorDialog(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Success Dialog */}
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent className='bg-white'>
           <AlertDialogHeader>
@@ -178,9 +182,6 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowSuccessDialog(false)}>
-              Ficar aqui
-            </AlertDialogCancel>
             <AlertDialogAction onClick={handleGoToDashboard}>
               Ir para o Dashboard
             </AlertDialogAction>

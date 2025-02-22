@@ -73,11 +73,11 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'cliente';
   updatedAt: string;
   createdAt: string;
-  email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;

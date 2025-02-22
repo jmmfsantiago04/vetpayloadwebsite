@@ -5,6 +5,8 @@ export const Pets: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'type', 'breed', 'owner'],
+    group: 'Conteúdo',
+    description: 'Gerenciar cadastro de pets',
   },
   access: {
     read: () => true,
@@ -18,6 +20,9 @@ export const Pets: CollectionConfig = {
       type: 'text',
       required: true,
       label: 'Nome do Pet',
+      admin: {
+        description: 'Digite o nome do pet',
+      },
     },
     {
       name: 'type',
@@ -29,12 +34,18 @@ export const Pets: CollectionConfig = {
         { label: 'Gato', value: 'cat' },
         { label: 'Outro', value: 'other' },
       ],
+      admin: {
+        description: 'Selecione o tipo de animal',
+      },
     },
     {
       name: 'breed',
       type: 'text',
       required: true,
       label: 'Raça',
+      admin: {
+        description: 'Digite a raça do pet',
+      },
     },
     {
       name: 'age',
@@ -43,6 +54,9 @@ export const Pets: CollectionConfig = {
       min: 0,
       max: 30,
       label: 'Idade',
+      admin: {
+        description: 'Digite a idade do pet (em anos)',
+      },
     },
     {
       name: 'weight',
@@ -51,11 +65,17 @@ export const Pets: CollectionConfig = {
       min: 0,
       max: 100,
       label: 'Peso (kg)',
+      admin: {
+        description: 'Digite o peso do pet em quilogramas',
+      },
     },
     {
       name: 'medicalHistory',
       type: 'textarea',
       label: 'Histórico Médico',
+      admin: {
+        description: 'Informações sobre o histórico médico do pet',
+      },
     },
     {
       name: 'owner',
@@ -64,6 +84,15 @@ export const Pets: CollectionConfig = {
       required: true,
       hasMany: false,
       label: 'Proprietário',
+      admin: {
+        description: 'Selecione o proprietário do pet',
+        useAsTitle: 'email',
+      },
+      filterOptions: {
+        role: {
+          equals: 'cliente'
+        }
+      },
     },
   ],
 } 

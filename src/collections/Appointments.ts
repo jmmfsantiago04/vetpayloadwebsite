@@ -1,60 +1,27 @@
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig, PayloadRequest } from 'payload/types'
+
+interface User {
+  role?: string
+}
+
+interface FilterData {
+  user?: string;
+}
 
 const Appointments: CollectionConfig = {
   slug: 'appointments',
   admin: {
     useAsTitle: 'date',
-    defaultColumns: ['date', 'time', 'pet', 'owner', 'status'],
-    group: 'Content',
-    listSearchableFields: ['date', 'time', 'status'],
-    description: 'Gerenciar consultas veterinárias',
+    defaultColumns: ['date', 'time', 'user', 'pet', 'status'],
+    group: 'Conteúdo',
+    description: 'Agendar consultas para usuários e seus pets',
   },
   access: {
-    read: ({ req }) => {
-      const user = req.user as { id: string; role?: string } | null
-      
-      // Admin can read all appointments
-      if (user?.role === 'admin') return true
-      
-      // Authenticated users can only read their own appointments
-      if (user) {
-        return {
-          owner: {
-            equals: user.id
-          }
-        }
-      }
-      
-      // Non-authenticated users cannot read appointments
-      return false
-    },
-    create: ({ req }) => {
-      const user = req.user as { role?: string } | null
-      // Only authenticated users can create appointments
-      return Boolean(user)
-    },
-    update: ({ req }) => {
-      const user = req.user as { id: string; role?: string } | null
-      
-      // Admin can update all appointments
-      if (user?.role === 'admin') return true
-      
-      // Regular users can only update their own appointments
-      if (user) {
-        return {
-          owner: {
-            equals: user.id
-          }
-        }
-      }
-      
-      return false
-    },
-    delete: ({ req }) => {
-      const user = req.user as { role?: string } | null
-      // Only admin can delete appointments
-      return user?.role === 'admin'
-    },
+    // Only admin can create/read/update/delete appointments
+    create: ({ req: { user } }: { req: PayloadRequest }) => (user as User)?.role === 'admin',
+    read: ({ req: { user } }: { req: PayloadRequest }) => (user as User)?.role === 'admin',
+    update: ({ req: { user } }: { req: PayloadRequest }) => (user as User)?.role === 'admin',
+    delete: ({ req: { user } }: { req: PayloadRequest }) => (user as User)?.role === 'admin',
   },
   fields: [
     {
@@ -66,17 +33,47 @@ const Appointments: CollectionConfig = {
           pickerAppearance: 'dayOnly',
           displayFormat: 'dd/MM/yyyy',
         },
-        description: 'Data da consulta',
-        position: 'sidebar'
+        description: 'Selecione a data da consulta',
       },
     },
     {
       name: 'time',
-      type: 'text',
+      type: 'select',
       required: true,
+      options: [
+        { label: '09:00', value: '09:00' },
+        { label: '09:30', value: '09:30' },
+        { label: '10:00', value: '10:00' },
+        { label: '10:30', value: '10:30' },
+        { label: '11:00', value: '11:00' },
+        { label: '11:30', value: '11:30' },
+        { label: '14:00', value: '14:00' },
+        { label: '14:30', value: '14:30' },
+        { label: '15:00', value: '15:00' },
+        { label: '15:30', value: '15:30' },
+        { label: '16:00', value: '16:00' },
+        { label: '16:30', value: '16:30' },
+        { label: '17:00', value: '17:00' },
+        { label: '17:30', value: '17:30' },
+      ],
       admin: {
-        description: 'Horário da consulta (ex: 09:00)',
-        position: 'sidebar'
+        description: 'Selecione o horário da consulta',
+      },
+    },
+    {
+      name: 'user',
+      type: 'relationship',
+      relationTo: 'users',
+      required: true,
+      hasMany: false,
+      label: 'Cliente',
+      admin: {
+        description: 'Selecione o cliente',
+      },
+      filterOptions: {
+        role: {
+          equals: 'cliente'
+        }
       },
     },
     {
@@ -84,54 +81,47 @@ const Appointments: CollectionConfig = {
       type: 'relationship',
       relationTo: 'pets',
       required: true,
+      hasMany: false,
+      label: 'Pet',
       admin: {
-        description: 'Selecione o pet para esta consulta'
-      }
-    },
-    {
-      name: 'owner',
-      type: 'relationship',
-      relationTo: 'users',
-      required: true,
-      admin: {
-        description: 'Proprietário do pet',
-        position: 'sidebar'
+        description: 'Selecione o pet',
       },
-      hooks: {
-        beforeChange: [
-          ({ req, operation }) => {
-            if (operation === 'create') {
-              return req.user.id
+      // Filter pets based on selected user
+      filterOptions: ({ data }: { data: FilterData }) => {
+        if (data?.user) {
+          return {
+            owner: {
+              equals: data.user
             }
           }
-        ]
+        }
+        return null
       }
     },
     {
       name: 'status',
       type: 'select',
       required: true,
-      defaultValue: 'scheduled',
+      defaultValue: 'agendada',
       options: [
         {
           label: 'Agendada',
-          value: 'scheduled',
+          value: 'agendada',
         },
         {
           label: 'Confirmada',
-          value: 'confirmed',
+          value: 'confirmada',
         },
         {
           label: 'Concluída',
-          value: 'completed',
+          value: 'concluida',
         },
         {
           label: 'Cancelada',
-          value: 'cancelled',
+          value: 'cancelada',
         },
       ],
       admin: {
-        position: 'sidebar',
         description: 'Status atual da consulta'
       }
     },
@@ -139,26 +129,7 @@ const Appointments: CollectionConfig = {
       name: 'notes',
       type: 'textarea',
       admin: {
-        description: 'Observações sobre a consulta',
-        position: 'sidebar'
-      },
-    },
-    {
-      name: 'createdAt',
-      type: 'date',
-      admin: {
-        position: 'sidebar',
-        readOnly: true,
-        description: 'Data de criação do agendamento'
-      },
-      hooks: {
-        beforeChange: [
-          ({ operation }) => {
-            if (operation === 'create') {
-              return new Date()
-            }
-          },
-        ],
+        description: 'Observações adicionais sobre a consulta',
       },
     },
   ],

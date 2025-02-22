@@ -12,7 +12,6 @@ import { Media } from './collections/Media'
 import Posts from './collections/Posts'
 import { Faqs } from './collections/Faqs'
 import { Reviews } from './collections/Reviews'
-import { Registrations } from './collections/Registrations'
 import { Pets } from './collections/Pets'
 import Appointments from './collections/Appointments'
 
@@ -26,21 +25,18 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Faqs, Reviews, Registrations, Pets, Appointments],
+  collections: [Users, Media, Posts, Faqs, Reviews, Pets, Appointments],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // database-adapter-config-start
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  // database-adapter-config-end
   sharp,
   plugins: [
     payloadCloudPlugin(),
-    // storage-adapter-placeholder
   ],
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),

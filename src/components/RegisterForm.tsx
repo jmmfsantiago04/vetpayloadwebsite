@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { register } from '@/app/actions/auth'
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from "@/components/ui/button"
@@ -18,11 +18,18 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const formSchema = z.object({
-  firstName: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
-  lastName: z.string().min(2, "O sobrenome deve ter pelo menos 2 caracteres"),
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Por favor, insira um e-mail válido"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 })
@@ -33,16 +40,16 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -50,20 +57,25 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
 
   async function onSubmit(formData: FormData) {
     setIsLoading(true)
-    setError(null)
-    setSuccess(null)
+    setErrorMessage(null)
+    setShowErrorDialog(false)
+    setShowSuccessDialog(false)
     
     try {
       const result = await register(undefined, formData)
       
       if (typeof result === 'string') {
-        setError(result)
+        setErrorMessage(result)
+        setShowErrorDialog(true)
       } else if (result?.success) {
-        setSuccess('Conta criada com sucesso!')
-        router.push('/cliente/dashboard')
+        setShowSuccessDialog(true)
+        setTimeout(() => {
+          router.push('/cliente/dashboard')
+        }, 2000)
       }
     } catch (err) {
-      setError('Ocorreu um erro ao tentar registrar. Por favor, tente novamente.')
+      setErrorMessage('Ocorreu um erro ao tentar registrar. Por favor, tente novamente.')
+      setShowErrorDialog(true)
     } finally {
       setIsLoading(false)
     }
@@ -71,65 +83,28 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
 
   return (
     <div className="w-full space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <CheckCircle className="h-4 w-4 text-green-500" />
-          <AlertDescription>{success}</AlertDescription>
-        </Alert>
-      )}
-
       <Form {...form}>
         <form action={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Digite seu nome" 
-                      {...field}
-                      name="firstName"
-                      disabled={isLoading}
-                      className="bg-background"
-                      autoComplete="given-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sobrenome</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Digite seu sobrenome" 
-                      {...field}
-                      name="lastName"
-                      disabled={isLoading}
-                      className="bg-background"
-                      autoComplete="family-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome Completo</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Digite seu nome completo" 
+                    {...field}
+                    name="name"
+                    disabled={isLoading}
+                    className="bg-background"
+                    autoComplete="name"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -186,7 +161,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
                 Registrando...
               </>
             ) : (
-              'Registrar'
+              'Criar Conta'
             )}
           </Button>
         </form>
@@ -198,9 +173,43 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
           onClick={onLoginClick}
           className="text-[var(--primary)] hover:underline focus:outline-none"
         >
-          Fazer login
+          Faça login
         </button>
       </div>
+
+      {/* Error Dialog */}
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Erro</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowErrorDialog(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Success Dialog */}
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conta Criada com Sucesso!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sua conta foi criada com sucesso! Você será redirecionado para o dashboard em instantes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => router.push('/cliente/dashboard')}>
+              Ir para o Dashboard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 } 

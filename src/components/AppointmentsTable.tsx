@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -9,325 +9,254 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
+import { Calendar, Clock, FileText, ArrowUpDown } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { cancelAppointment } from '@/app/actions/appointments'
-import { useRouter } from 'next/navigation'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
-
-interface Pet {
-  id: string
-  name: string
-  type: string
-}
-
-interface User {
-  id: string
-  email: string
-}
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 interface Appointment {
   id: string
   date: string
   time: string
-  pet: Pet
-  owner: User
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
+  type: string
+  status: 'agendada' | 'confirmada' | 'concluida' | 'cancelada'
   notes?: string
-  createdAt?: string
+  pet: {
+    id: string
+    name: string
+  }
 }
 
 interface AppointmentsTableProps {
   appointments: Appointment[]
 }
 
-const STATUS_COLORS = {
-  scheduled: 'bg-blue-50 text-blue-700',
-  confirmed: 'bg-green-50 text-green-700',
-  completed: 'bg-gray-50 text-gray-700',
-  cancelled: 'bg-red-50 text-red-700',
-}
+type SortField = 'date' | 'time' | 'pet' | 'type' | 'status';
+type SortOrder = 'asc' | 'desc';
 
-const STATUS_LABELS = {
-  scheduled: 'Agendada',
-  confirmed: 'Confirmada',
-  completed: 'Concluída',
-  cancelled: 'Cancelada',
-}
+export function AppointmentsTable({ appointments: initialAppointments }: AppointmentsTableProps) {
+  const [sortField, setSortField] = useState<SortField>('date')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments)
 
-const ITEMS_PER_PAGE = 5
+  const handleSort = (field: SortField) => {
+    const newOrder = field === sortField && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(newOrder);
 
-export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const router = useRouter()
-
-  const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentAppointments = appointments.slice(startIndex, endIndex)
-
-  const handleCancel = async (id: string) => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const result = await cancelAppointment(id)
-      if (result.error) {
-        setError(result.error)
-        return
+    const sortedAppointments = [...appointments].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (field) {
+        case 'date':
+          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        case 'time':
+          comparison = a.time.localeCompare(b.time);
+          break;
+        case 'pet':
+          comparison = a.pet.name.localeCompare(b.pet.name);
+          break;
+        case 'type':
+        case 'status':
+          comparison = a[field].localeCompare(b[field]);
+          break;
       }
-      router.refresh()
-    } catch (error) {
-      console.error('Error cancelling appointment:', error)
-      setError('Ocorreu um erro ao cancelar a consulta. Por favor, tente novamente.')
-    } finally {
-      setIsLoading(false)
+
+      return newOrder === 'asc' ? comparison : -comparison;
+    });
+
+    setAppointments(sortedAppointments);
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1" />;
+    return (
+      <ArrowUpDown 
+        className={`w-4 h-4 ml-1 transform ${sortOrder === 'desc' ? 'rotate-180' : ''} text-primary`} 
+      />
+    );
+  };
+
+  const getStatusColor = (status: Appointment['status']) => {
+    switch (status) {
+      case 'agendada':
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+      case 'confirmada':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+      case 'concluida':
+        return 'bg-green-100 text-green-800 hover:bg-green-200'
+      case 'cancelada':
+        return 'bg-red-100 text-red-800 hover:bg-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200'
     }
   }
 
-  const renderPaginationItems = () => {
-    const items = []
-    
-    if (totalPages <= 7) {
-      // If 7 or fewer pages, show all page numbers
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              href="#"
-              onClick={(e) => {
-                e.preventDefault()
-                setCurrentPage(i)
-              }}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        )
-      }
-    } else {
-      // Always show first page
-      items.push(
-        <PaginationItem key={1}>
-          <PaginationLink
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              setCurrentPage(1)
-            }}
-            isActive={currentPage === 1}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-      )
-
-      // Add ellipsis if current page is far from start
-      if (currentPage > 3) {
-        items.push(
-          <PaginationItem key="ellipsis-1">
-            <PaginationEllipsis />
-          </PaginationItem>
-        )
-      }
-
-      // Show current page and neighbors
-      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              href="#"
-              onClick={(e) => {
-                e.preventDefault()
-                setCurrentPage(i)
-              }}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        )
-      }
-
-      // Add ellipsis if current page is far from end
-      if (currentPage < totalPages - 2) {
-        items.push(
-          <PaginationItem key="ellipsis-2">
-            <PaginationEllipsis />
-          </PaginationItem>
-        )
-      }
-
-      // Always show last page
-      items.push(
-        <PaginationItem key={totalPages}>
-          <PaginationLink
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              setCurrentPage(totalPages)
-            }}
-            isActive={currentPage === totalPages}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      )
+  const getStatusText = (status: Appointment['status']) => {
+    switch (status) {
+      case 'agendada':
+        return 'Agendada'
+      case 'confirmada':
+        return 'Confirmada'
+      case 'concluida':
+        return 'Concluída'
+      case 'cancelada':
+        return 'Cancelada'
+      default:
+        return status
     }
-
-    return items
   }
 
   return (
     <div className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="rounded-lg border bg-white">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-gray-50/50">
-              <TableHead>Data</TableHead>
-              <TableHead>Horário</TableHead>
-              <TableHead>Pet</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Observações</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {appointments.length > 0 ? (
-              currentAppointments.map((appointment) => (
-                <TableRow key={appointment.id} className="hover:bg-gray-50/50">
-                  <TableCell>
-                    {format(new Date(appointment.date), "dd 'de' MMMM", { locale: ptBR })}
-                  </TableCell>
-                  <TableCell>{appointment.time}</TableCell>
-                  <TableCell>
-                    {appointment.pet.name} ({appointment.pet.type === 'dog' ? 'Cachorro' : appointment.pet.type === 'cat' ? 'Gato' : 'Outro'})
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="secondary"
-                      className={STATUS_COLORS[appointment.status]}
-                    >
-                      {STATUS_LABELS[appointment.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {appointment.notes || '-'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {appointment.status === 'scheduled' && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                            disabled={isLoading}
-                          >
-                            Cancelar
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-white">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Cancelar Consulta</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja cancelar a consulta agendada para {format(new Date(appointment.date), "dd 'de' MMMM", { locale: ptBR })} às {appointment.time}?
-                              Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Não, manter consulta</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleCancel(appointment.id)}
-                              className="bg-red-500 hover:bg-red-600 text-white"
-                            >
-                              {isLoading ? "Cancelando..." : "Sim, cancelar consulta"}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell 
-                  colSpan={6} 
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  Nenhuma consulta agendada
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Suas Consultas</h2>
       </div>
 
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault()
-                  setCurrentPage(page => Math.max(1, page - 1))
-                }}
-                aria-disabled={currentPage === 1}
-                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-            
-            {renderPaginationItems()}
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault()
-                  setCurrentPage(page => Math.min(totalPages, page + 1))
-                }}
-                aria-disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-gray-50/50">
+            <TableHead>
+              <button
+                onClick={() => handleSort('date')}
+                className="flex items-center hover:text-primary transition-colors"
+              >
+                Data {getSortIcon('date')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button
+                onClick={() => handleSort('time')}
+                className="flex items-center hover:text-primary transition-colors"
+              >
+                Horário {getSortIcon('time')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button
+                onClick={() => handleSort('pet')}
+                className="flex items-center hover:text-primary transition-colors"
+              >
+                Pet {getSortIcon('pet')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button
+                onClick={() => handleSort('type')}
+                className="flex items-center hover:text-primary transition-colors"
+              >
+                Tipo {getSortIcon('type')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button
+                onClick={() => handleSort('status')}
+                className="flex items-center hover:text-primary transition-colors"
+              >
+                Status {getSortIcon('status')}
+              </button>
+            </TableHead>
+            <TableHead className="text-right">Detalhes</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {appointments.length > 0 ? (
+            appointments.map((appointment) => (
+              <TableRow key={appointment.id} className="hover:bg-gray-50/50">
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    {format(new Date(appointment.date), "dd/MM/yyyy")}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    {appointment.time}
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium">{appointment.pet.name}</TableCell>
+                <TableCell>{appointment.type}</TableCell>
+                <TableCell>
+                  <Badge className={getStatusColor(appointment.status)}>
+                    {getStatusText(appointment.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="icon" className="hover:bg-primary/10">
+                        <FileText className="w-4 h-4 text-primary" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle>Detalhes da Consulta</DialogTitle>
+                        <DialogDescription>
+                          Informações detalhadas sobre a consulta
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium mb-1">Data e Hora</h4>
+                          <p className="text-sm text-gray-600">
+                            {format(new Date(appointment.date), "dd/MM/yyyy")} às {appointment.time}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Pet</h4>
+                          <p className="text-sm text-gray-600">{appointment.pet.name}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Tipo de Consulta</h4>
+                          <p className="text-sm text-gray-600">{appointment.type}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Status</h4>
+                          <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor(appointment.status)}`}>
+                            {getStatusText(appointment.status)}
+                          </span>
+                        </div>
+                        {appointment.notes && (
+                          <div>
+                            <h4 className="font-medium mb-1">Observações</h4>
+                            <p className="text-sm text-gray-600">{appointment.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell 
+                colSpan={6} 
+                className="h-32 text-center text-muted-foreground"
+              >
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Calendar className="h-8 w-8 text-muted-foreground/50" />
+                  <p>Nenhuma consulta agendada</p>
+                  <p className="text-sm">Entre em contato com a clínica para agendar uma consulta</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   )
 } 

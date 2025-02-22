@@ -77,12 +77,11 @@ export async function register(
   try {
     const email = formData.get('email')
     const password = formData.get('password')
-    const firstName = formData.get('firstName')
-    const lastName = formData.get('lastName')
+    const name = formData.get('name')
 
-    if (!email || !password || !firstName || !lastName || 
+    if (!email || !password || !name || 
         typeof email !== 'string' || typeof password !== 'string' ||
-        typeof firstName !== 'string' || typeof lastName !== 'string') {
+        typeof name !== 'string') {
       return 'Por favor, preencha todos os campos'
     }
 
@@ -110,8 +109,8 @@ export async function register(
       data: {
         email,
         password,
-        firstName,
-        lastName,
+        name,
+        role: 'cliente', // Set default role
       },
     })
 

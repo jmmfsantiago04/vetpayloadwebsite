@@ -35,7 +35,7 @@ export const authConfig = {
           return {
             id: user.id,
             email: user.email,
-            name: `${user.firstName} ${user.lastName}`,
+            name: user.name,
             payloadToken: token,
           }
         } catch (error) {
