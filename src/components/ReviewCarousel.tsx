@@ -51,53 +51,52 @@ export default function ReviewCarousel({ reviews = [] }: { reviews: Review[] }) 
           loop: true,
         }}
         plugins={[plugin]}
-        className="w-full max-w-6xl mx-auto px-4"
+        className="w-full max-w-6xl mx-auto"
       >
         <CarouselContent>
           {reviews.map((review) => (
             <CarouselItem key={review.id} className="sm:basis-1/2 lg:basis-1/3 pl-4">
-              <Card className="p-6 h-full bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-semibold text-sm">
-                    {review.initials}
+              <Card className="p-8 h-full bg-white backdrop-blur-sm border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-lg tracking-wide">{review.name}</h3>
+                      <p className="text-sm text-[var(--primary)]">
+                        Tutor de {translatePetType(review.petType)}
+                      </p>
+                    </div>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      {new Date(review.date).toLocaleDateString('pt-BR')}
+                    </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-[var(--text-primary)]">{review.name}</h3>
-                        <p className="text-sm text-[var(--text-secondary)]">
-                          Tutor de {translatePetType(review.petType)}
-                        </p>
-                      </div>
-                      <span className="text-sm text-[var(--text-secondary)] ml-2 whitespace-nowrap">
-                        {new Date(review.date).toLocaleDateString('pt-BR')}
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, index) => (
+                      <span
+                        key={index}
+                        className={`text-xl ${
+                          index < review.rating ? 'text-yellow-500' : 'text-gray-200'
+                        }`}
+                      >
+                        ★
                       </span>
-                    </div>
-                    <div className="flex gap-0.5 my-2">
-                      {[...Array(5)].map((_, index) => (
-                        <span
-                          key={index}
-                          className={`text-lg ${
-                            index < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                    <blockquote className="text-[var(--text-primary)] mt-3">
-                      &ldquo;{review.review}&rdquo;
-                    </blockquote>
+                    ))}
                   </div>
+                  <blockquote className="text-gray-700 text-base leading-relaxed">
+                    &ldquo;{review.review}&rdquo;
+                  </blockquote>
                 </div>
               </Card>
             </CarouselItem>
           ))}
         </CarouselContent>
         {reviews.length > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <CarouselPrevious className="static" />
-            <CarouselNext className="static" />
+          <div className="flex items-center justify-center gap-6 mt-8">
+            <CarouselPrevious 
+              className="relative static bg-white/10 hover:bg-white/20 border-0 text-white h-10 w-10 rounded-full transition-all duration-300"
+            />
+            <CarouselNext 
+              className="relative static bg-white/10 hover:bg-white/20 border-0 text-white h-10 w-10 rounded-full transition-all duration-300"
+            />
           </div>
         )}
       </Carousel>

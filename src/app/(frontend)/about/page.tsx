@@ -1,10 +1,22 @@
-'use client'
 import Image from 'next/image'
 import Link from 'next/link'
 import Footer from '../../../components/Footer'
 import ReviewCarousel from '../../../components/ReviewCarousel'
+import { getApprovedReviews } from '@/app/actions/review'
 
-export default function About() {
+export default async function About() {
+  const { reviews, error } = await getApprovedReviews()
+  
+  const transformedReviews = reviews?.map(review => ({
+    id: review.id,
+    name: review.name,
+    petType: review.petType,
+    rating: review.rating,
+    review: review.comment,
+    date: review.createdAt,
+    initials: review.name.split(' ').map(n => n[0]).join('').toUpperCase()
+  })) || []
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
       <main className="flex-grow">
@@ -12,9 +24,9 @@ export default function About() {
         <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold mb-6">About Us</h1>
+              <h1 className="text-4xl font-bold mb-6">Sobre Nós</h1>
               <p className="text-lg text-[var(--accent)] max-w-2xl mx-auto">
-                Bringing over three decades of veterinary expertise to your doorstep
+                Trazendo mais de três décadas de experiência veterinária até você
               </p>
             </div>
           </div>
@@ -39,24 +51,23 @@ export default function About() {
                 </h2>
                 <div className="space-y-4 text-[var(--text-secondary)]">
                   <p>
-                    With over 30 years of dedicated service in veterinary medicine, Dr. Mauricio
-                    Faria has been a trusted name in pet healthcare in Salvador. His journey in
-                    veterinary medicine began with a passion for helping animals and has evolved
-                    into a mission to make quality pet care more accessible to all.
+                    Com mais de 30 anos de serviço dedicado à medicina veterinária, o Dr. Mauricio
+                    Faria é um nome respeitado no cuidado com animais em Salvador. Sua jornada na
+                    medicina veterinária começou com uma paixão por ajudar animais e evoluiu para
+                    uma missão de tornar o atendimento veterinário de qualidade mais acessível a todos.
                   </p>
                   <p>
-                    As the founder and lead veterinarian of his successful clinic in Salvador, Dr.
-                    Faria has treated thousands of pets, gaining invaluable experience in various
-                    aspects of veterinary medicine. His expertise spans from routine care to complex
-                    medical procedures, always maintaining the highest standards of veterinary
-                    practice.
+                    Como fundador e veterinário chefe de sua clínica de sucesso em Salvador, Dr.
+                    Faria já tratou milhares de pets, adquirindo uma experiência inestimável em vários
+                    aspectos da medicina veterinária. Sua expertise abrange desde cuidados de rotina até
+                    procedimentos médicos complexos, sempre mantendo os mais altos padrões da prática veterinária.
                   </p>
                   <p>
-                    Recognizing the changing needs of pet owners and the advantages of modern
-                    technology, Dr. Faria has expanded his services to include online consultations.
-                    This innovative approach allows him to reach more pet owners while maintaining
-                    the same level of professional care and personal attention that has defined his
-                    practice for three decades.
+                    Reconhecendo as necessidades em constante mudança dos tutores de pets e as vantagens da
+                    tecnologia moderna, Dr. Faria expandiu seus serviços para incluir consultas online.
+                    Essa abordagem inovadora permite que ele alcance mais tutores de pets enquanto mantém
+                    o mesmo nível de atendimento profissional e atenção personalizada que tem definido
+                    sua prática por três décadas.
                   </p>
                 </div>
               </div>
@@ -68,26 +79,26 @@ export default function About() {
         <section className="py-16 bg-[var(--accent)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center text-[var(--text-primary)] mb-12">
-              Our Expertise
+              Nossa Expertise
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  title: 'Clinical Experience',
+                  title: 'Experiência Clínica',
                   description:
-                    'Decades of hands-on experience in treating various pet conditions and emergencies.',
+                    'Décadas de experiência prática no tratamento de diversas condições e emergências de pets.',
                   icon: '🏥',
                 },
                 {
-                  title: 'Modern Approach',
+                  title: 'Abordagem Moderna',
                   description:
-                    'Combining traditional veterinary knowledge with modern telemedicine capabilities.',
+                    'Combinando conhecimento veterinário tradicional com recursos modernos de telemedicina.',
                   icon: '💻',
                 },
                 {
-                  title: 'Continued Education',
+                  title: 'Educação Continuada',
                   description:
-                    'Regular participation in veterinary conferences and continuous professional development.',
+                    'Participação regular em congressos veterinários e desenvolvimento profissional contínuo.',
                   icon: '📚',
                 },
               ].map((item, index) => (
@@ -108,15 +119,15 @@ export default function About() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">
-                Our Physical Clinic
+                Nossa Clínica Física
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <p className="text-[var(--text-secondary)] mb-4">
-                    While we offer comprehensive online consultations, our physical clinic in
-                    Salvador continues to provide full-service veterinary care. Our modern facility
-                    is equipped with state-of-the-art medical equipment and staffed by experienced
-                    professionals.
+                    Embora ofereçamos consultas online abrangentes, nossa clínica física em
+                    Salvador continua fornecendo atendimento veterinário completo. Nossas instalações
+                    modernas são equipadas com equipamentos médicos de última geração e contam com
+                    profissionais experientes.
                   </p>
                   <div className="space-y-2">
                     <p className="flex items-center text-[var(--text-secondary)]">
@@ -155,14 +166,14 @@ export default function About() {
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      Open Monday - Saturday
+                      Aberto de Segunda a Sábado
                     </p>
                   </div>
                 </div>
                 <div className="relative h-[200px] rounded-xl overflow-hidden">
                   <Image
                     src="/clinic.jpg"
-                    alt="Our Veterinary Clinic"
+                    alt="Nossa Clínica Veterinária"
                     fill
                     style={{ objectFit: 'cover' }}
                     className="rounded-xl"
@@ -176,19 +187,26 @@ export default function About() {
         {/* Review Section */}
         <section className="py-16 bg-gradient-to-br from-[var(--secondary)] to-[var(--secondary-light)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center text-white mb-12">
-              What Our Clients Say
-            </h2>
-            <ReviewCarousel />
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                O Que Nossos Clientes Dizem
+              </h2>
+              <div className="w-24 h-1 bg-[var(--accent)] mx-auto rounded-full"></div>
+            </div>
+            <div className="relative px-12">
+
+                <ReviewCarousel reviews={transformedReviews} />
+          
+            </div>
           </div>
         </section>
 
         {/* CTA Section */}
         <section className="py-16 bg-[var(--primary)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-6">Experience Expert Pet Care</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">Experimente um Atendimento Veterinário de Excelência</h2>
             <p className="text-lg text-[var(--accent)] mb-8 max-w-2xl mx-auto">
-              Book a consultation with Dr. Mauricio Faria and give your pet the care they deserve.
+              Agende uma consulta com o Dr. Mauricio Faria e ofereça ao seu pet o cuidado que ele merece.
             </p>
             <Link
               href="https://wa.me/5571991916499"
@@ -196,7 +214,7 @@ export default function About() {
               rel="noopener noreferrer"
               className="inline-flex items-center bg-white text-[var(--primary)] px-8 py-3 rounded-full text-lg hover:bg-[var(--accent)] transition-all transform hover:scale-105"
             >
-              Schedule Now
+              Agendar Agora
             </Link>
           </div>
         </section>

@@ -24,6 +24,7 @@ import { AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Appointment {
   id: string
@@ -46,9 +47,10 @@ type SortField = 'date' | 'time' | 'pet' | 'type' | 'status';
 type SortOrder = 'asc' | 'desc';
 
 export function AppointmentsTable({ appointments: initialAppointments }: AppointmentsTableProps) {
+  const [isLoading, setIsLoading] = useState(false)
   const [sortField, setSortField] = useState<SortField>('date')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
-  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments)
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments || [])
 
   const handleSort = (field: SortField) => {
     const newOrder = field === sortField && sortOrder === 'asc' ? 'desc' : 'asc';
@@ -117,6 +119,55 @@ export function AppointmentsTable({ appointments: initialAppointments }: Appoint
       default:
         return status
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-48" />
+        </div>
+
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Horário</TableHead>
+                <TableHead>Pet</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Detalhes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[1, 2, 3].map((index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-300" />
+                      <Skeleton className="h-5 w-[100px]" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-300" />
+                      <Skeleton className="h-5 w-[60px]" />
+                    </div>
+                  </TableCell>
+                  <TableCell><Skeleton className="h-5 w-[120px]" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-[100px] rounded-full" /></TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-8 w-8 rounded-full ml-auto" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    )
   }
 
   return (
