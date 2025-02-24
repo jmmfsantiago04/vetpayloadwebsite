@@ -3,7 +3,7 @@
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
-type Category = 'general' | 'services' | 'pricing' | 'technical' | 'privacy'
+type Category = 'geral' | 'servicos' | 'precos' | 'tecnico' | 'privacidade'
 
 interface PayloadFaq {
   id: string
@@ -67,7 +67,10 @@ export async function createFaq(data: {
 
     const faq = await payload.create({
       collection: 'faqs',
-      data,
+      data: {
+        ...data,
+        category: data.category as any, // Type assertion needed due to Payload types mismatch
+      },
     })
     return { success: true, faq, error: null }
   } catch (error) {
@@ -94,7 +97,10 @@ export async function updateFaq(
     const faq = await payload.update({
       collection: 'faqs',
       id,
-      data,
+      data: {
+        ...data,
+        category: data.category as any, // Type assertion needed due to Payload types mismatch
+      },
     })
     return { success: true, faq, error: null }
   } catch (error) {

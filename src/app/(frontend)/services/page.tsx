@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Footer from '../../../components/Footer'
 
 const services = [
   {
@@ -199,6 +200,7 @@ export default function Services() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   )
 }

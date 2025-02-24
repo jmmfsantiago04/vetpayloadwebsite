@@ -1,10 +1,28 @@
 import { Suspense } from 'react'
-import { SearchInput } from '@/components/SearchInput'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getFaqs } from '../../actions/faq'
-import FaqAccordion from '@/components/FaqAccordion'
+import Footer from '../../../components/Footer'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { HelpCircle, AlertCircle } from 'lucide-react'
 
-type Category = 'general' | 'services' | 'pricing' | 'technical' | 'privacy'
+type Category = 'geral' | 'servicos' | 'precos' | 'tecnico' | 'privacidade'
 
 interface FAQ {
   id: string
@@ -17,99 +35,175 @@ interface FAQ {
   updatedAt: string
 }
 
-interface SearchFaqsProps {
-  faqs: FAQ[]
-  searchQuery: string
+const defaultColors = {
+  bg: 'bg-white',
+  text: 'text-gray-900',
+  border: 'border-gray-200'
 }
 
-function SearchFaqs({ faqs, searchQuery }: SearchFaqsProps) {
-  const filteredFaqs = faqs.filter((faq) =>
-    faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    faq.category.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+const categoryLabels: Record<Category, string> = {
+  geral: 'Informações Gerais',
+  servicos: 'Nossos Serviços',
+  precos: 'Valores e Pagamentos',
+  tecnico: 'Informações Técnicas',
+  privacidade: 'Privacidade e Segurança'
+}
 
-  if (filteredFaqs.length === 0) {
+const categoryIcons: Record<Category, string> = {
+  geral: '🔍',
+  servicos: '🏥',
+  precos: '💰',
+  tecnico: '⚙️',
+  privacidade: '🔒'
+}
+
+const categoryColors: Record<Category, { bg: string, text: string, border: string }> = {
+  geral: {
+    bg: 'bg-white',
+    text: 'text-gray-900',
+    border: 'border-gray-200'
+  },
+  servicos: {
+    bg: 'bg-white',
+    text: 'text-gray-900',
+    border: 'border-gray-200'
+  },
+  precos: {
+    bg: 'bg-white',
+    text: 'text-gray-900',
+    border: 'border-gray-200'
+  },
+  tecnico: {
+    bg: 'bg-white',
+    text: 'text-gray-900',
+    border: 'border-gray-200'
+  },
+  privacidade: {
+    bg: 'bg-white',
+    text: 'text-gray-900',
+    border: 'border-gray-200'
+  }
+}
+
+function FaqContent({ faqs }: { faqs: FAQ[] }) {
+  if (faqs.length === 0) {
     return (
-      <div className="text-center text-gray-600">
-        {faqs.length === 0 ? 'Nenhuma FAQ disponível.' : 'Nenhuma FAQ corresponde à sua busca.'}
-      </div>
+      <Card className="text-center py-8">
+        <CardContent>
+          <HelpCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhuma FAQ disponível.</p>
+        </CardContent>
+      </Card>
     )
   }
 
-  return <FaqAccordion faqs={filteredFaqs} />
+  // Group FAQs by category
+  const groupedFaqs = faqs.reduce((acc, faq) => {
+    const category = faq.category as Category
+    if (!acc[category]) {
+      acc[category] = []
+    }
+    acc[category].push(faq)
+    return acc
+  }, {} as Record<Category, FAQ[]>)
+
+  return (
+    <div className="space-y-8">
+      {Object.entries(groupedFaqs).map(([category, categoryFaqs]) => {
+        const categoryKey = category as Category
+        const label = categoryLabels[categoryKey] || category
+
+        return (
+          <Card key={category}>
+            <CardHeader>
+              <CardTitle className="text-xl">{label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="space-y-2">
+                {categoryFaqs.map((faq) => (
+                  <AccordionItem
+                    key={faq.id}
+                    value={faq.id}
+                    className="border-none shadow-none data-[state=open]:bg-gray-50/50 rounded-md"
+                  >
+                    <AccordionTrigger className="hover:bg-gray-50/50 rounded-md transition-all px-4 py-3 hover:no-underline">
+                      <span className="text-left font-medium text-gray-900">
+                        {faq.question}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 text-gray-700">
+                      <div className="pb-3">
+                        {faq.answer}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  )
 }
 
 const FaqSkeleton = () => (
-  <div className="space-y-4">
-    {[...Array(5)].map((_, index) => (
-      <div 
-        key={index} 
-        className="bg-white rounded-lg p-6 animate-pulse"
-        style={{
-          animationDelay: `${index * 100}ms`
-        }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="space-y-2 flex-1 mr-4">
-            <div className="h-5 w-3/4 rounded-md bg-gray-200" />
-            <div className="h-5 w-1/2 rounded-md bg-gray-200" />
+  <div className="space-y-8">
+    {[...Array(3)].map((_, groupIndex) => (
+      <Card key={groupIndex}>
+        <CardHeader>
+          <Skeleton className="h-7 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, itemIndex) => (
+              <div key={itemIndex} className="space-y-2">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            ))}
           </div>
-          <div className="h-6 w-6 rounded-full bg-gray-200 flex-shrink-0" />
-        </div>
-        <div className="space-y-2">
-          <div className="h-4 w-full rounded-md bg-gray-200" />
-          <div className="h-4 w-5/6 rounded-md bg-gray-200" />
-          <div className="h-4 w-4/6 rounded-md bg-gray-200" />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     ))}
   </div>
 )
 
-export default async function FAQ({
-  searchParams,
-}: {
-  searchParams?: { q?: string }
-}) {
+export default async function FAQ() {
   const result = await getFaqs()
-  const searchQuery = searchParams?.q || ''
 
   if (result.error) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-grow bg-gray-50 py-12">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center text-red-600">Erro ao carregar FAQs: {result.error}</div>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <main className="flex-grow py-12">
+          <div className="container max-w-3xl mx-auto px-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erro</AlertTitle>
+              <AlertDescription>Erro ao carregar FAQs: {result.error}</AlertDescription>
+            </Alert>
           </div>
         </main>
+        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow bg-gray-50 py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Perguntas Frequentes
-            </h1>
-            <p className="text-lg text-gray-600 mb-6">
-              Encontre respostas para as perguntas mais comuns sobre nossos serviços veterinários
-            </p>
-            <SearchInput
-              placeholder="Buscar nas perguntas frequentes..."
-              className="mx-auto"
-            />
-          </div>
-
-          <Suspense fallback={<FaqSkeleton />}>
-            <SearchFaqs faqs={result.faqs || []} searchQuery={searchQuery} />
-          </Suspense>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <main className="flex-grow py-12">
+        <div className="container max-w-3xl mx-auto px-4">
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-center mb-12">
+            Perguntas Frequentes
+          </h1>
+          <ScrollArea className="h-[calc(100vh-400px)]">
+            <Suspense fallback={<FaqSkeleton />}>
+              <FaqContent faqs={result.faqs || []} />
+            </Suspense>
+          </ScrollArea>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

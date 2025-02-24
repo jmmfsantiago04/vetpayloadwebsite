@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
-import { SearchInput } from '@/components/SearchInput'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getPosts } from '../../actions/blog'
+import Footer from '../../../components/Footer'
 
 interface Post {
   id: string
@@ -27,7 +27,6 @@ function getImageAlt(post: Post): string {
 
 interface SearchBlogProps {
   posts: Post[]
-  searchQuery: string
 }
 
 function BlogPostCard({ post }: { post: Post }) {
@@ -73,23 +72,18 @@ function BlogPostCard({ post }: { post: Post }) {
   )
 }
 
-function SearchBlog({ posts, searchQuery }: SearchBlogProps) {
-  const filteredPosts = posts.filter((post) =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  if (filteredPosts.length === 0) {
+function SearchBlog({ posts }: SearchBlogProps) {
+  if (posts.length === 0) {
     return (
       <div className="text-center text-gray-600">
-        {posts.length === 0 ? 'Nenhum post disponível no momento.' : 'Nenhum post corresponde à sua busca.'}
+        Nenhum post disponível no momento.
       </div>
     )
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {filteredPosts.map((post) => (
+      {posts.map((post) => (
         <Suspense key={post.id} fallback={<BlogPostSkeleton />}>
           <BlogPostCard post={post} />
         </Suspense>
@@ -123,13 +117,8 @@ const BlogSkeleton = () => (
   </div>
 )
 
-export default async function Blog({
-  searchParams,
-}: {
-  searchParams?: { q?: string }
-}) {
+export default async function Blog() {
   const result = await getPosts()
-  const searchQuery = searchParams?.q || ''
 
   if (result.error) {
     return (
@@ -139,6 +128,7 @@ export default async function Blog({
             <div className="text-center text-red-600">Erro ao carregar posts: {result.error}</div>
           </div>
         </main>
+        <Footer />
       </div>
     )
   }
@@ -153,17 +143,14 @@ export default async function Blog({
             <p className="text-lg text-gray-600 mb-6">
               Descubra dicas, insights e histórias sobre saúde e felicidade dos pets
             </p>
-            <SearchInput
-              placeholder="Buscar posts por título ou categoria..."
-              className="mx-auto"
-            />
           </div>
 
           <Suspense fallback={<BlogSkeleton />}>
-            <SearchBlog posts={result.posts || []} searchQuery={searchQuery} />
+            <SearchBlog posts={result.posts || []} />
           </Suspense>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }
