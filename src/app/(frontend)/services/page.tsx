@@ -1,58 +1,63 @@
 'use client'
 import Link from 'next/link'
 import Footer from '../../../components/Footer'
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Suspense } from 'react'
 
 const services = [
   {
     id: 1,
-    name: 'Video Consultation',
+    name: 'Consulta por Vídeo',
     description:
-      'Face-to-face virtual appointments with experienced veterinarians for comprehensive pet care guidance.',
+      'Consultas virtuais face a face com veterinários experientes para orientação abrangente no cuidado com seu pet.',
     price: 'R$120',
-    duration: '30 minutes',
+    duration: '30 minutos',
     features: [
-      'Real-time video interaction',
-      'Behavioral assessment',
-      'Diet and nutrition advice',
-      'Follow-up recommendations',
-      'Digital prescription if needed',
-      '24/7 availability',
+      'Interação por vídeo em tempo real',
+      'Avaliação comportamental',
+      'Orientação sobre dieta e nutrição',
+      'Recomendações de acompanhamento',
+      'Prescrição digital quando necessário',
+      'Disponibilidade 24/7',
     ],
     icon: '🎥',
     image: '/video-consultation.jpg',
   },
   {
     id: 2,
-    name: 'Chat Support',
+    name: 'Suporte por Chat',
     description:
-      'Instant messaging with veterinary professionals for quick questions and ongoing pet care support.',
+      'Mensagens instantâneas com profissionais veterinários para dúvidas rápidas e suporte contínuo no cuidado com seu pet.',
     price: 'R$60',
-    duration: 'Unlimited for 24 hours',
+    duration: 'Ilimitado por 24 horas',
     features: [
-      'Quick response time',
-      'Photo sharing capability',
-      'Care instructions',
-      'Medication guidance',
-      'Diet recommendations',
-      'Prevention tips',
+      'Resposta rápida',
+      'Compartilhamento de fotos',
+      'Instruções de cuidados',
+      'Orientação sobre medicamentos',
+      'Recomendações de dieta',
+      'Dicas de prevenção',
     ],
     icon: '💬',
     image: '/chat-support.jpg',
   },
   {
     id: 3,
-    name: 'Emergency Support',
+    name: 'Suporte Emergencial',
     description:
-      'Priority access to veterinarians for urgent pet health concerns and immediate guidance.',
+      'Acesso prioritário a veterinários para preocupações urgentes com a saúde do seu pet e orientação imediata.',
     price: 'R$180',
-    duration: 'Priority 15-min response',
+    duration: 'Resposta em 15 min',
     features: [
-      '24/7 emergency access',
-      'Priority response',
-      'Urgent care guidance',
-      'Emergency first aid',
-      'Hospital referral if needed',
-      'Follow-up check',
+      'Acesso emergencial 24/7',
+      'Atendimento prioritário',
+      'Orientação para urgências',
+      'Primeiros socorros',
+      'Encaminhamento hospitalar se necessário',
+      'Acompanhamento posterior',
     ],
     icon: '🚨',
     image: '/emergency-support.jpg',
@@ -61,22 +66,65 @@ const services = [
 
 const commonConditions = [
   {
-    category: 'Behavioral',
-    conditions: ['Anxiety', 'Aggression', 'House Training', 'Excessive Barking'],
+    category: 'Comportamental',
+    conditions: ['Ansiedade', 'Agressividade', 'Adestramento', 'Latidos Excessivos'],
   },
   {
-    category: 'Digestive',
-    conditions: ['Vomiting', 'Diarrhea', 'Loss of Appetite', 'Weight Changes'],
+    category: 'Digestivo',
+    conditions: ['Vômito', 'Diarreia', 'Perda de Apetite', 'Alterações de Peso'],
   },
   {
-    category: 'Skin & Coat',
-    conditions: ['Itching', 'Rashes', 'Hair Loss', 'Hot Spots'],
+    category: 'Pele e Pelagem',
+    conditions: ['Coceira', 'Alergias', 'Queda de Pelo', 'Hotspots'],
   },
   {
-    category: 'General Wellness',
-    conditions: ['Vaccination Advice', 'Diet Consultation', 'Preventive Care', 'Senior Pet Care'],
+    category: 'Bem-estar Geral',
+    conditions: ['Orientação sobre Vacinas', 'Consulta Nutricional', 'Cuidados Preventivos', 'Cuidados com Pets Idosos'],
   },
 ]
+
+function ServiceCardSkeleton() {
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <Skeleton className="h-12 w-12 rounded-full mb-4" />
+        <Skeleton className="h-6 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-full" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-4 w-1/3" />
+          <div className="space-y-2 mt-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-4 w-full" />
+            ))}
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Skeleton className="h-10 w-full" />
+      </CardFooter>
+    </Card>
+  )
+}
+
+function ConditionCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-1/2 mb-4" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function Services() {
   return (
@@ -86,10 +134,10 @@ export default function Services() {
         <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold mb-6">Our Online Veterinary Services</h1>
+              <h1 className="text-4xl font-bold mb-6">Nossos Serviços Veterinários Online</h1>
               <p className="text-lg text-[var(--accent)] max-w-2xl mx-auto">
-                Professional pet care from the comfort of your home. Choose the service that best
-                fits your needs.
+                Cuidados profissionais para seu pet no conforto da sua casa. Escolha o serviço que melhor
+                atende às suas necessidades.
               </p>
             </div>
           </div>
@@ -98,60 +146,66 @@ export default function Services() {
         {/* Services Section */}
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {services.map((service) => (
-                <div key={service.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                  <div className="relative h-48">
-                    <div className="absolute inset-0 bg-[var(--primary)] opacity-10"></div>
-                    <div className="absolute inset-0 flex items-center justify-center text-6xl">
-                      {service.icon}
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">
-                      {service.name}
-                    </h3>
-                    <p className="text-[var(--text-secondary)] mb-4">{service.description}</p>
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-2xl font-bold text-[var(--primary)]">
-                        {service.price}
-                      </span>
-                      <span className="text-sm text-[var(--text-secondary)]">
-                        {service.duration}
-                      </span>
-                    </div>
-                    <ul className="space-y-2 mb-6">
-                      {service.features.map((feature, index) => (
-                        <li key={index} className="flex items-center text-[var(--text-secondary)]">
-                          <svg
-                            className="w-5 h-5 text-[var(--primary)] mr-2"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link
-                      href="https://wa.me/5571991916499"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full bg-[var(--primary)] text-white text-center py-3 rounded-xl hover:bg-[var(--primary-light)] transition-all transform hover:scale-[1.02]"
-                    >
-                      Book Now
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[1, 2, 3].map((i) => (
+                  <ServiceCardSkeleton key={i} />
+                ))}
+              </div>
+            }>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {services.map((service) => (
+                  <Card key={service.id} className="h-full">
+                    <CardHeader>
+                      <div className="text-6xl mb-4">{service.icon}</div>
+                      <CardTitle className="text-2xl mb-2">{service.name}</CardTitle>
+                      <CardDescription>{service.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-between items-center mb-4">
+                        <Badge variant="default" className="text-lg px-3 py-1">
+                          {service.price}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {service.duration}
+                        </span>
+                      </div>
+                      <ul className="space-y-2">
+                        {service.features.map((feature, index) => (
+                          <li key={index} className="flex items-center text-sm">
+                            <svg
+                              className="w-5 h-5 text-[var(--primary)] mr-2"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter>
+                      <Button asChild className="w-full">
+                        <Link
+                          href="https://wa.me/5571991916499"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Agendar Agora
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </Suspense>
           </div>
         </section>
 
@@ -159,44 +213,57 @@ export default function Services() {
         <section className="py-16 bg-[var(--accent)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center mb-12 text-[var(--text-primary)]">
-              Common Conditions We Help With
+              Condições Comuns que Tratamos
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {commonConditions.map((item, index) => (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
-                  <h3 className="text-xl font-semibold text-[var(--primary)] mb-4">
-                    {item.category}
-                  </h3>
-                  <ul className="space-y-2">
-                    {item.conditions.map((condition, idx) => (
-                      <li key={idx} className="flex items-center text-[var(--text-secondary)]">
-                        <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full mr-2"></span>
-                        {condition}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[1, 2, 3, 4].map((i) => (
+                  <ConditionCardSkeleton key={i} />
+                ))}
+              </div>
+            }>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {commonConditions.map((item, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle className="text-xl text-[var(--primary)]">
+                        {item.category}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {item.conditions.map((condition, idx) => (
+                          <li key={idx} className="flex items-center text-[var(--text-secondary)]">
+                            <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full mr-2"></span>
+                            {condition}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </Suspense>
           </div>
         </section>
 
         {/* CTA Section */}
         <section className="py-16 bg-gradient-to-br from-[var(--secondary)] to-[var(--secondary-light)] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+            <h2 className="text-3xl font-bold mb-6">Pronto para Começar?</h2>
             <p className="text-lg text-[var(--accent)] mb-8 max-w-2xl mx-auto">
-              Choose the service that best fits your needs and book your consultation today. Our
-              veterinarians are here to help!
+              Escolha o serviço que melhor atende às suas necessidades e agende sua consulta hoje. Nossos
+              veterinários estão aqui para ajudar!
             </p>
-            <Link
-              href="https://wa.me/5571991916499"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center bg-white text-[var(--primary)] px-8 py-3 rounded-full text-lg hover:bg-[var(--accent)] transition-all transform hover:scale-105"
-            >
-              Contact Us Now
-            </Link>
+            <Button asChild size="lg" variant="secondary">
+              <Link
+                href="https://wa.me/5571991916499"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Entre em Contato
+              </Link>
+            </Button>
           </div>
         </section>
       </main>
