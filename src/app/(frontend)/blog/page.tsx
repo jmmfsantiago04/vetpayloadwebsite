@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getPosts } from '../../actions/blog'
 import Footer from '../../../components/Footer'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 interface Post {
   id: string
@@ -117,22 +118,28 @@ const BlogSkeleton = () => (
   </div>
 )
 
-export default async function Blog() {
+// Blog Posts Component
+async function BlogPosts() {
   const result = await getPosts()
 
   if (result.error) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-grow bg-gray-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center text-red-600">Erro ao carregar posts: {result.error}</div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    )
+    throw new Error(result.error)
   }
 
+  return <SearchBlog posts={result.posts || []} />
+}
+
+// Error fallback component
+const BlogErrorFallback = () => (
+  <div className="p-8 rounded-lg bg-red-50 border border-red-200">
+    <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar os posts</h3>
+    <p className="text-red-600">
+      Estamos com dificuldades para carregar o conteúdo do blog. Por favor, tente novamente mais tarde.
+    </p>
+  </div>
+)
+
+export default function Blog() {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow bg-gray-50 py-12">
@@ -145,9 +152,11 @@ export default async function Blog() {
             </p>
           </div>
 
-          <Suspense fallback={<BlogSkeleton />}>
-            <SearchBlog posts={result.posts || []} />
-          </Suspense>
+          <ErrorBoundary fallback={<BlogErrorFallback />}>
+            <Suspense fallback={<BlogSkeleton />}>
+              <BlogPosts />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </main>
       <Footer />

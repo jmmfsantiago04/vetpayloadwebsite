@@ -1,11 +1,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import Footer from '../../../components/Footer'
 import ReviewCarousel from '../../../components/ReviewCarousel'
 import { getApprovedReviews } from '@/app/actions/review'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
-export default async function About() {
+// Reviews Component
+async function Reviews() {
   const { reviews, error } = await getApprovedReviews()
+  
+  if (error) {
+    throw new Error(error)
+  }
   
   const transformedReviews = reviews?.map(review => ({
     id: review.id,
@@ -17,22 +24,32 @@ export default async function About() {
     initials: review.name.split(' ').map(n => n[0]).join('').toUpperCase()
   })) || []
 
+  return <ReviewCarousel reviews={transformedReviews} />
+}
+
+// Loading component for Reviews
+function ReviewsLoading() {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)]">
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold mb-6">Sobre Nós</h1>
-              <p className="text-lg text-[var(--accent)] max-w-2xl mx-auto">
-                Trazendo mais de três décadas de experiência veterinária até você
+    <div className="animate-pulse">
+      <div className="h-8 bg-white/20 w-64 mx-auto mb-8 rounded"></div>
+      <div className="h-48 bg-white/10 rounded-lg max-w-2xl mx-auto"></div>
+    </div>
+  )
+}
+
+// Error fallback for Reviews
+const ReviewsErrorFallback = () => (
+  <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+    <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar as avaliações</h3>
+    <p className="text-red-600 text-sm">
+      Estamos com dificuldades para carregar as avaliações. Por favor, tente novamente mais tarde.
               </p>
             </div>
-          </div>
-        </section>
+)
 
-        {/* Doctor Profile Section */}
+// Doctor Profile Section Component
+function DoctorProfile() {
+  return (
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -74,15 +91,12 @@ export default async function About() {
             </div>
           </div>
         </section>
+  )
+}
 
-        {/* Expertise Section */}
-        <section className="py-16 bg-[var(--accent)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center text-[var(--text-primary)] mb-12">
-              Nossa Expertise
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
+// Expertise Section Component
+function ExpertiseSection() {
+  const expertiseItems = [
                 {
                   title: 'Experiência Clínica',
                   description:
@@ -101,7 +115,16 @@ export default async function About() {
                     'Participação regular em congressos veterinários e desenvolvimento profissional contínuo.',
                   icon: '📚',
                 },
-              ].map((item, index) => (
+  ]
+
+  return (
+    <section className="py-16 bg-[var(--accent)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold text-center text-[var(--text-primary)] mb-12">
+          Nossa Expertise
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {expertiseItems.map((item, index) => (
                 <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
                   <div className="text-4xl mb-4">{item.icon}</div>
                   <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
@@ -113,8 +136,12 @@ export default async function About() {
             </div>
           </div>
         </section>
+  )
+}
 
-        {/* Clinic Information */}
+// Clinic Information Section Component
+function ClinicInformation() {
+  return (
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -183,6 +210,33 @@ export default async function About() {
             </div>
           </div>
         </section>
+  )
+}
+
+export default function About() {
+  return (
+    <div className="min-h-screen flex flex-col bg-[var(--background)]">
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-6">Sobre Nós</h1>
+              <p className="text-lg text-[var(--accent)] max-w-2xl mx-auto">
+                Trazendo mais de três décadas de experiência veterinária até você
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Doctor Profile Section */}
+        <DoctorProfile />
+
+        {/* Expertise Section */}
+        <ExpertiseSection />
+
+        {/* Clinic Information */}
+        <ClinicInformation />
 
         {/* Review Section */}
         <section className="py-16 bg-gradient-to-br from-[var(--secondary)] to-[var(--secondary-light)]">
@@ -194,9 +248,11 @@ export default async function About() {
               <div className="w-24 h-1 bg-[var(--accent)] mx-auto rounded-full"></div>
             </div>
             <div className="relative px-12">
-
-                <ReviewCarousel reviews={transformedReviews} />
-          
+              <ErrorBoundary fallback={<ReviewsErrorFallback />}>
+                <Suspense fallback={<ReviewsLoading />}>
+                  <Reviews />
+                </Suspense>
+              </ErrorBoundary>
             </div>
           </div>
         </section>
@@ -204,7 +260,9 @@ export default async function About() {
         {/* CTA Section */}
         <section className="py-16 bg-[var(--primary)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-6">Experimente um Atendimento Veterinário de Excelência</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">
+              Experimente um Atendimento Veterinário de Excelência
+            </h2>
             <p className="text-lg text-[var(--accent)] mb-8 max-w-2xl mx-auto">
               Agende uma consulta com o Dr. Mauricio Faria e ofereça ao seu pet o cuidado que ele merece.
             </p>

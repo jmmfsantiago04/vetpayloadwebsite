@@ -5,9 +5,7 @@ import { useSession } from 'next-auth/react';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { data: session } = useSession();
-
-  const clientAreaLink = session ? '/cliente/dashboard' : '/cliente/login';
+  const { data: session, status } = useSession();
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -54,11 +52,19 @@ export default function Navbar() {
               Serviços
             </Link>
             <Link 
-              href={clientAreaLink}
+              href="/cliente/dashboard"
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Área do Cliente
             </Link>
+            {!session && (
+              <Link 
+                href="/login"
+                className="bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-light)] transition-colors font-medium"
+              >
+                Entrar
+              </Link>
+            )}
           </div>
 
           {/* Botão do Menu Mobile */}
@@ -115,11 +121,19 @@ export default function Navbar() {
                 Serviços
               </Link>
               <Link 
-                href={clientAreaLink}
+                href="/cliente/dashboard"
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Área do Cliente
               </Link>
+              {!session && (
+                <Link 
+                  href="/login"
+                  className="bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-light)] transition-colors font-medium inline-block text-center"
+                >
+                  Entrar
+                </Link>
+              )}
             </div>
           </div>
         )}

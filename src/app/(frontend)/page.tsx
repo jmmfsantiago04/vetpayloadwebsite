@@ -1,12 +1,65 @@
 import Image from 'next/image'
+import { Suspense } from 'react'
 import Footer from '../../components/Footer'
 import ReviewForm from '../../components/ReviewForm'
 import ReviewCarousel from '../../components/ReviewCarousel'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 import { getApprovedReviews } from '../actions/review'
 
-export default async function Home() {
+// Dynamic Reviews Component
+async function Reviews() {
   const { reviews, error } = await getApprovedReviews()
   
+  return (
+    <div className="mt-16">
+      <h3 className="text-xl font-semibold text-white text-center mb-8">
+        O que Dizem Nossos Clientes
+      </h3>
+      <ReviewCarousel reviews={reviews.map(review => ({
+        id: review.id,
+        name: review.name,
+        petType: review.petType,
+        rating: review.rating,
+        review: review.comment,
+        date: review.createdAt,
+        initials: review.name.split(' ').map(n => n[0]).join('').toUpperCase()
+      }))} />
+    </div>
+  )
+}
+
+// Loading component for Reviews
+function ReviewsLoading() {
+  return (
+    <div className="mt-16 animate-pulse">
+      <div className="h-8 bg-white/20 w-64 mx-auto mb-8 rounded"></div>
+      <div className="h-48 bg-white/10 rounded-lg max-w-2xl mx-auto"></div>
+    </div>
+  )
+}
+
+// Custom error fallbacks
+const ReviewFormErrorFallback = () => (
+  <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+    <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar o formulário</h3>
+    <p className="text-red-600 text-sm">
+      Tente atualizar a página ou volte mais tarde.
+    </p>
+  </div>
+)
+
+const ReviewsErrorFallback = () => (
+  <div className="mt-16">
+    <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+      <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar as avaliações</h3>
+      <p className="text-red-600 text-sm">
+        Estamos com dificuldades para carregar as avaliações. Por favor, tente novamente mais tarde.
+      </p>
+    </div>
+  </div>
+)
+
+export default function Home() {
   return (
     <>
       <main className="flex-grow">
@@ -127,24 +180,19 @@ export default async function Home() {
             </div>
 
             <div className="max-w-2xl mx-auto modern-card p-6">
-              <ReviewForm />
+              <ErrorBoundary fallback={<ReviewFormErrorFallback />}>
+                <Suspense fallback={<div className="animate-pulse h-64 bg-white/10 rounded-lg"></div>}>
+                  <ReviewForm />
+                </Suspense>
+              </ErrorBoundary>
             </div>
 
             {/* Carrossel de Avaliações */}
-            <div className="mt-16">
-              <h3 className="text-xl font-semibold text-white text-center mb-8">
-                O que Dizem Nossos Clientes
-              </h3>
-              <ReviewCarousel reviews={reviews.map(review => ({
-                id: review.id,
-                name: review.name,
-                petType: review.petType,
-                rating: review.rating,
-                review: review.comment,
-                date: review.createdAt,
-                initials: review.name.split(' ').map(n => n[0]).join('').toUpperCase()
-              }))} />
-            </div>
+            <ErrorBoundary fallback={<ReviewsErrorFallback />}>
+              <Suspense fallback={<ReviewsLoading />}>
+                <Reviews />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </section>
 

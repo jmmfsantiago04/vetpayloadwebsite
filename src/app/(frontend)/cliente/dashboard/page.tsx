@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { ClientPetsTable } from '@/components/ClientPetsTable'
 import { AppointmentsTable } from '@/components/AppointmentsTable'
 import { getPets } from '@/app/actions/pets'
@@ -10,11 +11,74 @@ import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Footer from '@/components/Footer'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+
+// Pets Component
+async function PetsSection() {
+  const petsResult = await getPets()
+  
+  if (petsResult.error) {
+    throw new Error(petsResult.error)
+  }
+
+  return (
+    <ClientPetsTable pets={petsResult.data || []} />
+  )
+}
+
+// Appointments Component
+async function AppointmentsSection() {
+  const appointmentsResult = await getAppointments()
+  
+  if (appointmentsResult.error) {
+    throw new Error(appointmentsResult.error)
+  }
+
+  return (
+    <AppointmentsTable appointments={appointmentsResult.data || []} />
+  )
+}
+
+// Loading components
+function PetsLoading() {
+  return (
+    <div className="animate-pulse space-y-4">
+      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+      <div className="h-32 bg-gray-200 rounded"></div>
+    </div>
+  )
+}
+
+function AppointmentsLoading() {
+  return (
+    <div className="animate-pulse space-y-4">
+      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+      <div className="h-32 bg-gray-200 rounded"></div>
+    </div>
+  )
+}
+
+// Error fallback components
+const PetsErrorFallback = () => (
+  <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+    <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar seus pets</h3>
+    <p className="text-red-600 text-sm">
+      Tente atualizar a página ou volte mais tarde.
+    </p>
+  </div>
+)
+
+const AppointmentsErrorFallback = () => (
+  <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+    <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar suas consultas</h3>
+    <p className="text-red-600 text-sm">
+      Tente atualizar a página ou volte mais tarde.
+    </p>
+  </div>
+)
 
 export default async function DashboardPage() {
   const session = await auth()
-  const petsResult = await getPets()
-  const appointmentsResult = await getAppointments()
 
   if (!session?.user) {
     return (
@@ -87,9 +151,11 @@ export default async function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClientPetsTable
-                pets={petsResult.data || []}
-              />
+              <ErrorBoundary fallback={<PetsErrorFallback />}>
+                <Suspense fallback={<PetsLoading />}>
+                  <PetsSection />
+                </Suspense>
+              </ErrorBoundary>
             </CardContent>
           </Card>
 
@@ -106,9 +172,11 @@ export default async function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AppointmentsTable
-                appointments={appointmentsResult.data || []}
-              />
+              <ErrorBoundary fallback={<AppointmentsErrorFallback />}>
+                <Suspense fallback={<AppointmentsLoading />}>
+                  <AppointmentsSection />
+                </Suspense>
+              </ErrorBoundary>
             </CardContent>
           </Card>
         </div>
