@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import Footer from '../../../components/Footer'
 import ReviewCarousel from '../../../components/ReviewCarousel'
+import DoctorProfile from '../../../components/DoctorProfile'
+import ExpertiseSection from '../../../components/ExpertiseSection'
+import ClinicInformation from '../../../components/ClinicInformation'
 import { getApprovedReviews } from '@/app/actions/review'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
@@ -43,175 +46,9 @@ const ReviewsErrorFallback = () => (
     <h3 className="text-red-800 font-medium mb-2">Não foi possível carregar as avaliações</h3>
     <p className="text-red-600 text-sm">
       Estamos com dificuldades para carregar as avaliações. Por favor, tente novamente mais tarde.
-              </p>
-            </div>
+    </p>
+  </div>
 )
-
-// Doctor Profile Section Component
-function DoctorProfile() {
-  return (
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src="/dr-mauricio.jpg"
-                  alt="Dr. Mauricio Faria"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  className="rounded-2xl"
-                />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-6">
-                  Dr. Mauricio Faria
-                </h2>
-                <div className="space-y-4 text-[var(--text-secondary)]">
-                  <p>
-                    Com mais de 30 anos de serviço dedicado à medicina veterinária, o Dr. Mauricio
-                    Faria é um nome respeitado no cuidado com animais em Salvador. Sua jornada na
-                    medicina veterinária começou com uma paixão por ajudar animais e evoluiu para
-                    uma missão de tornar o atendimento veterinário de qualidade mais acessível a todos.
-                  </p>
-                  <p>
-                    Como fundador e veterinário chefe de sua clínica de sucesso em Salvador, Dr.
-                    Faria já tratou milhares de pets, adquirindo uma experiência inestimável em vários
-                    aspectos da medicina veterinária. Sua expertise abrange desde cuidados de rotina até
-                    procedimentos médicos complexos, sempre mantendo os mais altos padrões da prática veterinária.
-                  </p>
-                  <p>
-                    Reconhecendo as necessidades em constante mudança dos tutores de pets e as vantagens da
-                    tecnologia moderna, Dr. Faria expandiu seus serviços para incluir consultas online.
-                    Essa abordagem inovadora permite que ele alcance mais tutores de pets enquanto mantém
-                    o mesmo nível de atendimento profissional e atenção personalizada que tem definido
-                    sua prática por três décadas.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-  )
-}
-
-// Expertise Section Component
-function ExpertiseSection() {
-  const expertiseItems = [
-                {
-                  title: 'Experiência Clínica',
-                  description:
-                    'Décadas de experiência prática no tratamento de diversas condições e emergências de pets.',
-                  icon: '🏥',
-                },
-                {
-                  title: 'Abordagem Moderna',
-                  description:
-                    'Combinando conhecimento veterinário tradicional com recursos modernos de telemedicina.',
-                  icon: '💻',
-                },
-                {
-                  title: 'Educação Continuada',
-                  description:
-                    'Participação regular em congressos veterinários e desenvolvimento profissional contínuo.',
-                  icon: '📚',
-                },
-  ]
-
-  return (
-    <section className="py-16 bg-[var(--accent)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-[var(--text-primary)] mb-12">
-          Nossa Expertise
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {expertiseItems.map((item, index) => (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
-                  <div className="text-4xl mb-4">{item.icon}</div>
-                  <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-[var(--text-secondary)]">{item.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-  )
-}
-
-// Clinic Information Section Component
-function ClinicInformation() {
-  return (
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">
-                Nossa Clínica Física
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-[var(--text-secondary)] mb-4">
-                    Embora ofereçamos consultas online abrangentes, nossa clínica física em
-                    Salvador continua fornecendo atendimento veterinário completo. Nossas instalações
-                    modernas são equipadas com equipamentos médicos de última geração e contam com
-                    profissionais experientes.
-                  </p>
-                  <div className="space-y-2">
-                    <p className="flex items-center text-[var(--text-secondary)]">
-                      <svg
-                        className="w-5 h-5 text-[var(--primary)] mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      Salvador, Bahia
-                    </p>
-                    <p className="flex items-center text-[var(--text-secondary)]">
-                      <svg
-                        className="w-5 h-5 text-[var(--primary)] mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      Aberto de Segunda a Sábado
-                    </p>
-                  </div>
-                </div>
-                <div className="relative h-[200px] rounded-xl overflow-hidden">
-                  <Image
-                    src="/clinic.jpg"
-                    alt="Nossa Clínica Veterinária"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    className="rounded-xl"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-  )
-}
 
 export default function About() {
   return (
