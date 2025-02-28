@@ -7,6 +7,7 @@ import * as z from "zod"
 import { register } from '@/app/actions/auth'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -68,6 +69,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
         setErrorMessage(result)
         setShowErrorDialog(true)
       } else if (result?.success) {
+        toast.success('Conta criada com sucesso!', {
+          description: 'Redirecionando para o dashboard...'
+        })
         setShowSuccessDialog(true)
         setTimeout(() => {
           router.push('/cliente/dashboard')

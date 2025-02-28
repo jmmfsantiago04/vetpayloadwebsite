@@ -7,6 +7,7 @@ import * as z from "zod"
 import { authenticate } from '@/app/actions/auth'
 import { Loader2, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -66,6 +67,9 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
         setErrorMessage(result)
         setShowErrorDialog(true)
       } else if (result?.success) {
+        toast.success('Login realizado com sucesso!', {
+          description: 'Redirecionando para o dashboard...'
+        })
         setShowSuccessDialog(true)
       }
     } catch (err) {

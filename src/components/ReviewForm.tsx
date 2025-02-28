@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { submitReview } from '@/app/actions/review'
+import { toast } from "sonner"
 
 const MAX_NAME_LENGTH = 50
 const MAX_REVIEW_LENGTH = 200
@@ -101,6 +102,9 @@ export default function ReviewForm() {
       })
 
       if (result.success) {
+        toast.success('Avaliação enviada!', {
+          description: 'Agradecemos seu feedback.'
+        })
         setShowSuccessDialog(true)
         form.reset()
       } else {

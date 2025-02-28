@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState } from "react"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
@@ -78,6 +79,9 @@ export function PetForm({ pet, onSubmit, isLoading }: PetFormProps) {
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       await onSubmit(data)
+      toast.success('Pet salvo com sucesso!', {
+        description: 'As informações foram atualizadas.'
+      })
     } catch (error) {
       console.error('Form submission error:', error)
       setErrorMessage("Ocorreu um erro ao salvar o pet. Por favor, tente novamente.")
