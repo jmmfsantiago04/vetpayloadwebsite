@@ -9,24 +9,12 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     config.module.rules.push({
       test: /\.(png|jpg|gif|svg|ico)$/i,
       type: 'asset/resource',
     })
-
-    // Disable cache during build
-    config.cache = false
-
     return config
-  },
-  // Increase build memory limit
-  experimental: {
-    memoryBasedWorkersCount: true,
-  },
-  // Increase serverComponentsExternalPackages
-  experimental: {
-    serverComponentsExternalPackages: ['sharp'],
   },
 }
 

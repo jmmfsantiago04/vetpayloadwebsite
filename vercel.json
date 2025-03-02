@@ -1,16 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "next.config.js",
-      "use": "@vercel/next"
-    }
-  ],
-  "build": {
-    "env": {
-      "NODE_OPTIONS": "--max_old_space_size=4096"
-    }
-  },
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "buildCommand": "npm run build"
+  "framework": "nextjs"
 }
