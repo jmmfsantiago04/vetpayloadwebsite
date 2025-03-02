@@ -9,6 +9,10 @@ export default function Navbar() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
 
+  const handleLinkClick = () => {
+    setIsMobileMenuOpen(false)
+  }
+
   useEffect(() => {
     setIsMobileMenuOpen(false)
   }, [pathname])
@@ -104,30 +108,35 @@ export default function Navbar() {
             <div className="flex flex-col space-y-4">
               <Link
                 href="/about"
+                onClick={handleLinkClick}
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Sobre
               </Link>
               <Link
                 href="/blog"
+                onClick={handleLinkClick}
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Blog
               </Link>
               <Link
                 href="/faq"
+                onClick={handleLinkClick}
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Dúvidas
               </Link>
               <Link
                 href="/services"
+                onClick={handleLinkClick}
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Serviços
               </Link>
               <Link
                 href="/cliente/dashboard"
+                onClick={handleLinkClick}
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Área do Cliente
@@ -135,6 +144,7 @@ export default function Navbar() {
               {!session && (
                 <Link
                   href="/login"
+                  onClick={handleLinkClick}
                   className="bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-light)] transition-colors font-medium inline-block text-center"
                 >
                   Entrar
