@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "PAYLOAD_PUBLIC_SERVER_URL": "WILL_BE_SET_BY_VERCEL_DEPLOYMENT",
+    "NEXT_PUBLIC_SERVER_URL": "WILL_BE_SET_BY_VERCEL_DEPLOYMENT"
+  }
+}

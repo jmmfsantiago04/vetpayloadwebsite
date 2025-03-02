@@ -16,7 +16,13 @@ function getImageAlt(post: any): string {
   return post.imageUrl.alt || post.title
 }
 
-export default async function BlogPost({ params }: { params: { slug: string } }) {
+interface PageProps {
+  params: {
+    slug: string
+  }
+}
+
+export default async function BlogPost({ params }: PageProps) {
   const { post, error } = await getPostBySlug(params.slug)
 
   if (error || !post) {
