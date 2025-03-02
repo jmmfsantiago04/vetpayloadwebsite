@@ -10,7 +10,15 @@ function getImageUrl(imageUrl: string | { url: string; alt: string } | undefined
   return typeof imageUrl === 'string' ? imageUrl : imageUrl.url
 }
 
-function getImageAlt(post: any): string {
+interface Post {
+  imageUrl?: string | { url: string; alt: string }
+  title: string
+  category: string
+  date: string
+  content: any
+}
+
+function getImageAlt(post: Post): string {
   if (!post.imageUrl) return ''
   if (typeof post.imageUrl === 'string') return post.title
   return post.imageUrl.alt || post.title
