@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: true,
+    domains: ['*'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -16,6 +16,7 @@ const nextConfig = {
     })
     return config
   },
+  output: 'standalone',
 }
 
-export default nextConfig
+module.exports = nextConfig
