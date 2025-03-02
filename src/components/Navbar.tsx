@@ -1,11 +1,17 @@
-"use client"
-import Link from 'next/link';
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
+'use client'
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { data: session, status } = useSession()
+  const pathname = usePathname()
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [pathname])
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -13,52 +19,52 @@ export default function Navbar() {
         <div className="flex justify-between items-center">
           {/* Links da Esquerda - Ocultos no Mobile */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/about" 
+            <Link
+              href="/about"
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Sobre
             </Link>
-            <Link 
-              href="/blog" 
+            <Link
+              href="/blog"
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Blog
             </Link>
-            <Link 
-              href="/faq" 
+            <Link
+              href="/faq"
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Dúvidas
             </Link>
           </div>
-          
+
           {/* Logo Central */}
           <div className="flex items-center">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-2xl font-bold text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors"
             >
               VetPay
             </Link>
           </div>
-          
+
           {/* Links da Direita - Ocultos no Mobile */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/services" 
+            <Link
+              href="/services"
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Serviços
             </Link>
-            <Link 
+            <Link
               href="/cliente/dashboard"
               className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
             >
               Área do Cliente
             </Link>
             {!session && (
-              <Link 
+              <Link
                 href="/login"
                 className="bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-light)] transition-colors font-medium"
               >
@@ -96,38 +102,38 @@ export default function Navbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4">
             <div className="flex flex-col space-y-4">
-              <Link 
+              <Link
                 href="/about"
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Sobre
               </Link>
-              <Link 
+              <Link
                 href="/blog"
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Blog
               </Link>
-              <Link 
+              <Link
                 href="/faq"
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Dúvidas
               </Link>
-              <Link 
+              <Link
                 href="/services"
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Serviços
               </Link>
-              <Link 
+              <Link
                 href="/cliente/dashboard"
                 className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium"
               >
                 Área do Cliente
               </Link>
               {!session && (
-                <Link 
+                <Link
                   href="/login"
                   className="bg-[var(--primary)] text-white px-4 py-2 rounded-md hover:bg-[var(--primary-light)] transition-colors font-medium inline-block text-center"
                 >
@@ -139,5 +145,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  );
-} 
+  )
+}
