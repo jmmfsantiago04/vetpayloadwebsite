@@ -28,18 +28,18 @@ function getImageAlt(post: Post): string {
 export function BlogPostCard({ post }: { post: Post }) {
   return (
     <article
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+      className="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-[1.02]"
     >
       <Link href={`/blog/${post.slug}`}>
         {post.imageUrl && (
-          <div className="relative h-48">
+          <div className="relative h-48 overflow-hidden">
             <div className="absolute inset-0 bg-gray-200 animate-pulse" />
             <Image
               src={getImageUrl(post.imageUrl)!}
               alt={getImageAlt(post)}
               fill
               style={{ objectFit: 'cover' }}
-              className="group-hover:opacity-90 transition-opacity"
+              className="transition-all duration-300 ease-in-out hover:scale-105 hover:opacity-90"
               loading="lazy"
             />
           </div>
