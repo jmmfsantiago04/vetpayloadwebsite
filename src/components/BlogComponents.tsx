@@ -1,6 +1,8 @@
+'use client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
+import { motion } from 'framer-motion'
 
 // Types
 export interface Post {
@@ -27,21 +29,30 @@ function getImageAlt(post: Post): string {
 // Blog Post Card Component
 export function BlogPostCard({ post }: { post: Post }) {
   return (
-    <article
-      className="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-[1.02]"
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.02 }}
+      className="bg-white rounded-lg shadow-md overflow-hidden"
     >
       <Link href={`/blog/${post.slug}`}>
         {post.imageUrl && (
           <div className="relative h-48 overflow-hidden">
             <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-            <Image
-              src={getImageUrl(post.imageUrl)!}
-              alt={getImageAlt(post)}
-              fill
-              style={{ objectFit: 'cover' }}
-              className="transition-all duration-300 ease-in-out hover:scale-105 hover:opacity-90"
-              loading="lazy"
-            />
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Image
+                src={getImageUrl(post.imageUrl)!}
+                alt={getImageAlt(post)}
+                fill
+                style={{ objectFit: 'cover' }}
+                className="transition-all duration-300 ease-in-out hover:opacity-90"
+                loading="lazy"
+              />
+            </motion.div>
           </div>
         )}
         <div className="p-6">
@@ -64,7 +75,7 @@ export function BlogPostCard({ post }: { post: Post }) {
           </div>
         </div>
       </Link>
-    </article>
+    </motion.article>
   )
 }
 
@@ -114,12 +125,24 @@ export function BlogGrid({ posts }: BlogGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {posts.map((post) => (
-        <Suspense key={post.id} fallback={<BlogPostSkeleton />}>
-          <BlogPostCard post={post} />
-        </Suspense>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+    >
+      {posts.map((post, index) => (
+        <motion.div
+          key={post.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+        >
+          <Suspense fallback={<BlogPostSkeleton />}>
+            <BlogPostCard post={post} />
+          </Suspense>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   )
 } 
