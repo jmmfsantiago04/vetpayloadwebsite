@@ -1,5 +1,5 @@
 'use client'
-Nimport Link from 'next/link'
+import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import { motion } from 'framer-motion'
