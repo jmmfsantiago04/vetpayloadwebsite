@@ -24,46 +24,17 @@ interface AnimatedProps {
 export function AnimatedHero({ children }: AnimatedProps) {
   return (
     <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] text-white py-20"
     >
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        {children}
-      </motion.div>
+      {children}
     </motion.section>
   )
 }
 
-export function AnimatedTitle({ children }: AnimatedProps) {
-  return (
-    <motion.h1
-      variants={fadeInUp}
-      className="text-4xl font-bold mb-6"
-    >
-      {children}
-    </motion.h1>
-  )
-}
-
-export function AnimatedText({ children }: AnimatedProps) {
-  return (
-    <motion.p
-      variants={fadeInUp}
-      className="text-lg text-[var(--accent)] max-w-2xl mx-auto"
-    >
-      {children}
-    </motion.p>
-  )
-}
-
-export function AnimatedServiceGrid({ children }: AnimatedProps) {
+export function AnimatedServiceContainer({ children }: AnimatedProps) {
   return (
     <motion.div
       variants={containerVariants}
@@ -80,8 +51,7 @@ export function AnimatedServiceCard({ children }: AnimatedProps) {
   return (
     <motion.div
       variants={fadeInUp}
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className="h-full"
     >
       {children}
@@ -89,7 +59,7 @@ export function AnimatedServiceCard({ children }: AnimatedProps) {
   )
 }
 
-export function AnimatedConditionsGrid({ children }: AnimatedProps) {
+export function AnimatedConditionsContainer({ children }: AnimatedProps) {
   return (
     <motion.div
       variants={containerVariants}
@@ -107,7 +77,7 @@ export function AnimatedConditionCard({ children }: AnimatedProps) {
   return (
     <motion.div
       variants={fadeInUp}
-      whileHover={{ scale: 1.01 }}
+      whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
       {children}
@@ -124,14 +94,7 @@ export function AnimatedCTA({ children }: AnimatedProps) {
       transition={{ duration: 0.6 }}
       className="py-16 bg-gradient-to-br from-[var(--secondary)] to-[var(--secondary-light)] text-white"
     >
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
-      >
-        {children}
-      </motion.div>
+      {children}
     </motion.section>
   )
 } 

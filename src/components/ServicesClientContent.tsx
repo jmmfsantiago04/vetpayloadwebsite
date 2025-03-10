@@ -3,14 +3,11 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { motion } from 'framer-motion'
-import {
-  AnimatedHero,
-  AnimatedTitle,
-  AnimatedText,
-  AnimatedServiceGrid,
+import { 
+  AnimatedHero, 
+  AnimatedServiceContainer, 
   AnimatedServiceCard,
-  AnimatedConditionsGrid,
+  AnimatedConditionsContainer,
   AnimatedConditionCard,
   AnimatedCTA
 } from './AnimatedServiceComponents'
@@ -91,26 +88,26 @@ const commonConditions = [
   },
 ]
 
-export default function ServicesClientContent() {
+export function ServicesClientContent() {
   return (
     <>
       {/* Hero Section */}
       <AnimatedHero>
-        <div className="text-center">
-          <AnimatedTitle>
-            Nossos Serviços Veterinários Online
-          </AnimatedTitle>
-          <AnimatedText>
-            Cuidados profissionais para seu pet no conforto da sua casa. Escolha o serviço que melhor
-            atende às suas necessidades.
-          </AnimatedText>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-6">Nossos Serviços Veterinários Online</h1>
+            <p className="text-lg text-[var(--accent)] max-w-2xl mx-auto">
+              Cuidados profissionais para seu pet no conforto da sua casa. Escolha o serviço que melhor
+              atende às suas necessidades.
+            </p>
+          </div>
         </div>
       </AnimatedHero>
 
       {/* Services Section */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedServiceGrid>
+          <AnimatedServiceContainer>
             {services.map((service) => (
               <AnimatedServiceCard key={service.id}>
                 <Card className="h-full">
@@ -163,7 +160,7 @@ export default function ServicesClientContent() {
                 </Card>
               </AnimatedServiceCard>
             ))}
-          </AnimatedServiceGrid>
+          </AnimatedServiceContainer>
         </div>
       </section>
 
@@ -173,7 +170,7 @@ export default function ServicesClientContent() {
           <h2 className="text-3xl font-bold text-center mb-12 text-[var(--text-primary)]">
             Condições Comuns que Tratamos
           </h2>
-          <AnimatedConditionsGrid>
+          <AnimatedConditionsContainer>
             {commonConditions.map((item, index) => (
               <AnimatedConditionCard key={index}>
                 <Card>
@@ -195,21 +192,18 @@ export default function ServicesClientContent() {
                 </Card>
               </AnimatedConditionCard>
             ))}
-          </AnimatedConditionsGrid>
+          </AnimatedConditionsContainer>
         </div>
       </section>
 
       {/* CTA Section */}
       <AnimatedCTA>
-        <AnimatedTitle>Pronto para Começar?</AnimatedTitle>
-        <AnimatedText>
-          Escolha o serviço que melhor atende às suas necessidades e agende sua consulta hoje. Nossos
-          veterinários estão aqui para ajudar!
-        </AnimatedText>
-        <motion.div 
-          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-          className="mt-8"
-        >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-6">Pronto para Começar?</h2>
+          <p className="text-lg text-[var(--accent)] mb-8 max-w-2xl mx-auto">
+            Escolha o serviço que melhor atende às suas necessidades e agende sua consulta hoje. Nossos
+            veterinários estão aqui para ajudar!
+          </p>
           <Button asChild size="lg" variant="secondary">
             <Link
               href="https://wa.me/5571991916499"
@@ -219,7 +213,7 @@ export default function ServicesClientContent() {
               Entre em Contato
             </Link>
           </Button>
-        </motion.div>
+        </div>
       </AnimatedCTA>
     </>
   )
